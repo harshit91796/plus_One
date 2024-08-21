@@ -49,7 +49,7 @@ const Interests = () => {
     },
   ];
 
-  return <Setup title="Interests" ItemList={gggg} subCategory={true} />;
+  return <Setup title="Interests" ItemList={totalList} subCategory={false} />;
 };
 
 export default Interests;

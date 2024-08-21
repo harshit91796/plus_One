@@ -4,6 +4,7 @@ import * as ReactDOM from "react-dom/client";
 import './Index.css'
 import './assets/styles/initialSetup.scss'
 import './assets/styles/setTupPage.scss'
+import './assets/styles/cropper.scss'
 import { RouterProvider,
 } from "react-router-dom";
 import {router} from './routes';
