@@ -46,7 +46,7 @@ myImag.onload=function(){
         cropData.x,cropData.y,cropData.width,cropData.height,0,0,cropData.width,cropData.height
     )
     const imgUrl=mycanvas.toDataURL('image/jpeg')
-    getImageUrl(imgUrl)
+    getImageUrl(imgUrl,myImag)
     setpopup(false)
     setImgPath(null)
 }

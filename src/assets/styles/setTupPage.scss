@@ -13,8 +13,9 @@
         padding: 10px;
         border: none;
         font-size: 3vmax;
-        color: white;
-        background: $primary-accent-color;
+        color: $setup-button;
+        background: $setup-button-background;
+        @include gradient();
     }
     h2{
         font-size: 2.5vmax;
@@ -28,32 +29,38 @@
     }
     input{
         padding: 10px;
-        font-size: 2.5vmax;
+        font-size: 2vmax;
         border-radius: 5px;
         width: 100%;
-        border: 1px solid grey;
-        background-color: #f1f1f1;
+        border: none;
+        outline: none;
+        background-color: #ffffff;
     
     }
     .setupContainer{
         -webkit-user-select: none;
-        height: 78%;
-        max-height: 78%;
+        height: 77%;
+        max-height: 77%;
+
+        margin-top: 2%;
         overflow-y: scroll;
         flex-wrap: wrap;
         gap: 2%;
         padding: 5% 0;
 
         span{
-            font-size: 2vmax;
+            font-size: 1.5vmax;
             display: inline-block;
-            margin: 2.5%;
+            margin: 1.8%;
             margin-left: 0;
-            border: 1px solid grey;
             border-radius: 50px;
             padding: 5px 15px;
-            background-color: #f1f1f1;
-            
+            background-color: #ffffff;
+        }
+        .selected{
+            color: $setup-button;
+            background-color: $setup-button-background;
+            @include gradient();
         }
     }
 

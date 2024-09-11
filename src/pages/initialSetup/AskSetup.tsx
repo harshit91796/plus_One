@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 const AskSetup = () => {
   return (
@@ -7,9 +8,9 @@ const AskSetup = () => {
     <p>
     Completing your profile helps us personalize your experience. Filling relevant fields increases your chances of connecting with others.
     </p>
-    <span className="gspan" style={{background:'#9500CA',color:'white'}}>Lets do it</span>
-    <span className="gspan" >
-    I’ll do it later 
+    <span className="gspan" style={{background:'#9500CA',color:'white'}}><Link to='/interst'>Lets do it</Link></span>
+    <span className="gspan" ><Link to='/'>I’ll do it later</Link>
+     
     </span>
     
     

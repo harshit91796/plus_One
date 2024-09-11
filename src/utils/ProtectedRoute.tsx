@@ -1,16 +1,26 @@
-import React, {useState } from 'react'
-import NickName from '../pages/initialSetup/NickName';
-
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Login from '../pages/signing/Login';
 interface Props {
-  to:  React.ReactElement;
+  to: React.ReactElement; // Typing for the component to render
 }
 
-const ProtectedRoute: React.FC<Props> =({to}) => {
-  const [auth]=useState(true)
-  if(auth){
+const ProtectedRoute: React.FC<Props> = ({ to }) => {
+  const [auth, setAuth] = useState('');
+const navigate=useNavigate()
+  useEffect(() => {
+      const token = localStorage.getItem('authToken');
+      setAuth(token);
+      console.log('authto',token)
+  }, []); // Only run on component mount
+
+  // return auth && auth !== '' ? to : <Navigate to="/login" />;
+  if(auth&&auth!==''){
     return to;
   }else{
-    return <NickName/>
+    return to;
+    navigate('/login')
   }
-}
-export default ProtectedRoute
+};
+
+export default ProtectedRoute;

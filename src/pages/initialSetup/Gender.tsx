@@ -1,7 +1,31 @@
-import React, { useState } from "react";
-
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { newUser } from "../../redux/userSlice";
+import { createUser, getUserDetails, updateUserDetails } from "../../services/user";
 const Gender = () => {
   const [myGender, setMyGender] = useState(null);
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const handleSubmit = () => {
+    updateUserDetails({ field:'gender',value: myGender }).then((res) => {
+      if (res.status==200){
+         updateUserDetails({ field:'newUser',value: false }).then(()=>{
+          navigate(`/avatar`);
+         })
+       
+      }
+    });
+  };
+  useEffect(() => {
+    getUserDetails().then(res=>{
+      if (!res.data.data || !res.data.data.dob)navigate("/birthday"); 
+    })
+    
+  }, []);
+
   return (
     <div className="initial-setup">
       <h2>You Identifies As..</h2>
@@ -29,7 +53,7 @@ const Gender = () => {
       >
         Other {myGender == "other" ? "✔️" : null}
       </span>
-      <button> Continue</button>
+      {myGender ? <button onClick={handleSubmit}> Continue</button> : null}
     </div>
   );
 };

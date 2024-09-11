@@ -4,9 +4,10 @@ interface Props {
   title: string;
   ItemList: Array;
   subCategory: boolean;
+  handleSubmit:Function ;
 }
 
-const Setup: React.FC<Props> = ({ title, ItemList, subCategory }) => {
+const Setup: React.FC<Props> = ({ handleSubmit, title, ItemList, subCategory }) => {
   const [list, setList] = useState(ItemList || []);
   const [filteredList, setFilteredList] = useState(list);
 
@@ -25,6 +26,7 @@ const Setup: React.FC<Props> = ({ title, ItemList, subCategory }) => {
     }
     arr[ind] = obj;
     setFilteredList(arr);
+    console.log(arr)
   };
 
 
@@ -56,15 +58,12 @@ const Setup: React.FC<Props> = ({ title, ItemList, subCategory }) => {
           filteredList.map((x, ind) => {
             return (
               <div>
-                {subCategory ? <h4>{x.title}</h4> : null}
+                {subCategory ? <h4>{x.subTitle}</h4> : null}
                 {x.items.map((i) => {
                   const check = x.selectedItems.find((item) => item === i);
                   return (
                     <span
-                      style={{
-                        background: check ? "#9500CA" : "",
-                        color: check ? "white" : "",
-                      }}
+                    className={check ? "selected" : "notselected"}
                       onClick={() => changeList(i, ind)}
                     >
                       {pascle(i)}
@@ -75,7 +74,7 @@ const Setup: React.FC<Props> = ({ title, ItemList, subCategory }) => {
             );
           })}
       </div>
-      <button>Continue</button>
+      <button onClick={()=>handleSubmit(subCategory?filteredList:list)}>Continue</button>
 
     </div>
   );

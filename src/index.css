@@ -5,19 +5,40 @@
 
 *{
     font-family :poppins;
+    /* font-family: Nunito; */
     margin: 0;padding: 0;
     box-sizing: border-box;
 }
 body,html{
     width: 100%;
     height: 100%;
+    overflow: hidden;
+    background-color: #d2aaa820;
+    background-color: #e7e7e7;
+    /* background-color: #252525; */
+    /* background: linear-gradient(#00847B,#39A97C);
+    background: linear-gradient(#bbdddb,#c0e2d4); */
+    
 }
 #root{
     width: 100%;
     height: 100%;
+    /* background: linear-gradient(to right, #33336735, #278f7a35); */
 }
 
 
+.load{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000000ad;
+    position: absolute;
+    z-index: 55;
+    
+}
 
-
-
+.load img{
+    width: 250px;
+}
