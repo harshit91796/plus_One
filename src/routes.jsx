@@ -1,28 +1,61 @@
-import * as ReactDOM from "react-dom/client";
-import { createBrowserRouter } from "react-router-dom";
+import React from 'react';
+import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import HomePage from './pages/homepage/HomePage';
+import Login from './pages/loginSetup/Login';
+import Register from './pages/loginSetup/Register';
+import ConversationPage from './pages/conversationSetep/ConversationPage';
+import DirectMessagePage from './pages/conversationSetep/DirectMessagePage';
+import OAuthCallback from './pages/loginSetup/OAuthCallback';
 
-import NickName from "./pages/initialSetup/NickName";
-import Username from "./pages/initialSetup/Username";
-import ImageUpload from "./pages/initialSetup/ImageUpload";
-import Interests from "./pages/profileSetup/Interests";
-import ProtectedRoute from "./utils/ProtectedRoute";
+const ProtectedRoute = ({ children, requireAuth }) => {
+  const user = useSelector((state) => state.user.user);
+
+  if (requireAuth && !user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children ? children : <Outlet />;
+};
 
 export const router = createBrowserRouter([
   {
-    path: "/x",
-    element: <NickName/>,
+    path: '/login',
+    element: <Login />,
   },
   {
-    path:'/name',
-    element:<Username/>
-  } ,{
-    path:'/d',
-    element:<Interests/>
+    path: '/register',
+    element: <Register />,
   },
   {
-    path:'/m',
-    element:<ImageUpload/>
+    path: '/',
+    element: <ProtectedRoute requireAuth={false} />,
+    children: [
+      {
+        path: '',
+        element: <HomePage />,
+      },
+      {
+        path: 'conversations',
+        element: (
+          <ProtectedRoute requireAuth={true}>
+            <ConversationPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'conversation/direct/message/:chatId',
+        element: (
+          <ProtectedRoute requireAuth={true}>
+            <DirectMessagePage />
+          </ProtectedRoute>
+        ),
+      },
+    ],
+  },
+  {
+    path: '/oauth-callback',
+    element: <OAuthCallback />,
   },
 ]);
 
- 
