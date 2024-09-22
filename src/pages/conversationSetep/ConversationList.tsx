@@ -25,28 +25,25 @@ const ConversationList: React.FC<ConversationListProps> = ({ chats, selectedChat
   }
 
   return (
-    <div className="conversation-list">
+    <>
       {chats.map((chat) => (
         <Link
           key={chat._id}
           to={`/conversation/direct/message/${chat._id}`}
           className={`chat-item ${chat._id === selectedChatId ? 'selected' : ''}`}
         >
-          <div className="chat-avatar">
-            {chat.isGroupChat ? 'G' : chat.users.find(u => u._id !== user._id)?.name.charAt(0)}
-          </div>
+          <img src={chat.isGroupChat ? 'group.png' : `user${Math.floor(Math.random() * 4) + 1}.png`} alt={chat.chatName} className="chat-avatar" />
           <div className="chat-info">
-            <h3>{chat.isGroupChat ? chat.chatName : chat.users.find(u => u._id !== user._id)?.name}</h3>
-            <p>{chat.latestMessage ? `${chat.latestMessage.sender.name}: ${chat.latestMessage.content}` : 'No messages yet'}</p>
+            <p className="chat-name">{chat.isGroupChat ? chat.chatName : chat.users.find(u => u._id !== user._id)?.name}</p>
+            <p className="chat-message">{chat.latestMessage ? chat.latestMessage.content : 'No messages yet'}</p>
           </div>
-          {chat.latestMessage && (
-            <div className="chat-time">
-              {new Date(chat.latestMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </div>
-          )}
+          <div className="chat-meta">
+            <p className="chat-time">{chat.latestMessage ? new Date(chat.latestMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</p>
+            {/* Add unread count if available */}
+          </div>
         </Link>
       ))}
-    </div>
+    </>
   );
 };
 

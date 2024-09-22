@@ -47,9 +47,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, messages, onSendMessage
 
   return (
     <div className="chat-window">
-      <div className="chat-header">
-        <h2>{currentChat?.isGroupChat ? currentChat.chatName : currentChat?.users.find((u: any) => u._id !== currentUser._id)?.name}</h2>
-      </div>
       <div className="messages">
         {messages.map((message) => (
           <MessageItem 
@@ -60,14 +57,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, messages, onSendMessage
         ))}
         <div ref={messagesEndRef} />
       </div>
-      <form onSubmit={handleSend} className="message-input">
+      <form onSubmit={handleSend} className="chat-input">
+        <button className="attach-button">📎</button>
         <input
           type="text"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Message..."
+          className="input-box"
         />
-        <button type="submit">Send</button>
+        <button type="submit" className="send-button">📤</button>
       </form>
     </div>
   );

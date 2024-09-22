@@ -167,61 +167,52 @@ const ConversationPage: React.FC = () => {
   }
 
   return (
-    <div className="app-container">
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <div className="app-logo">A</div>
-          <input 
-            type="text" 
-            placeholder="Search" 
-            className="search-input" 
-            value={searchQuery}
-            onChange={handleSearch}
-          />
+    <div className="chat-container">
+      {/* Header Section */}
+      <div className="chat-header">
+        <h1>Chats</h1>
+        <i className="fas fa-search"></i>
+      </div>
+
+      {/* Story Section */}
+      <div className="story-section">
+        <div className="story">
+          <div className="add-story">
+            <span>+</span>
+          </div>
+          <p>Add story</p>
         </div>
-        {searchResults.length > 0 && (
-         <div className="search-results-container">
-           <ul className="search-results">
-            {searchResults.map((user) => (
-              <li key={user._id} onClick={() => handleSelectSearchResult(user._id)}>
-                {user.name}
-              </li>
-            ))}
-          </ul>
-         </div>
-        )}
-        <nav className="sidebar-nav">
-          <button className="nav-item active">All chats</button>
-          <button className="nav-item">Groups</button>
-          <button className="nav-item">Friends</button>
-          <button className="nav-item">News</button>
-          <button className="nav-item">Archive chats</button>
-        </nav>
-        <div className="user-profile">
-          <img src={user?.avatar || 'default-avatar.png'} alt="Profile" className="user-avatar" />
-          <span className="user-name">{user?.name}</span>
-        </div>
-        <button className="logout-button" onClick={handleLogout}>Log out</button>
-      </aside>
-      <main className="main-content">
+        {['Terry', 'Craig', 'Roger', 'Nolan'].map((user, index) => (
+          <div className="story" key={index}>
+            <img src={`user${index + 1}.png`} alt={user} />
+            <p>{user}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Tabs Section */}
+      <div className="tabs">
+        <button className="tab active">General</button>
+        <button className="tab">Groups</button>
+        <button className="tab">Requests</button>
+      </div>
+
+      {/* Chat List */}
+      <div className="chat-list">
         <ConversationList
           chats={chats}
           onSelectChat={handleSelectChat}
           selectedChatId={selectedChatId}
           user={user}
         />
-        <ChatWindow
-          chatId={selectedChatId}
-          messages={messages}
-          onSendMessage={handleSendMessage}
-          currentChat={chats.find(c => c._id === selectedChatId)}
-          currentUser={user}
-        />
-        <div className="group-info">
-          <h3>Group Info</h3>
-          {/* Add group info content here */}
-        </div>
-      </main>
+      </div>
+
+      {/* Bottom Navigation */}
+      <div className="bottom-nav">
+        <i className="fas fa-home"></i>
+        <button className="new-chat-btn">+ New Chat</button>
+        <i className="fas fa-bars"></i>
+      </div>
     </div>
   );
 };

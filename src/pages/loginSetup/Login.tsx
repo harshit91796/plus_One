@@ -27,8 +27,18 @@ const Login: React.FC = () => {
     setError('');
     try {
       const userData = await login(formData.email, formData.password);
-      dispatch(setUser(userData.data));
-      navigate('/', { replace: true }); // Change this line to navigate to the home page
+      console.log('User data:', userData);
+       if(userData){
+        dispatch(setUser(userData.data));
+        if(!userData.data.profilePic){
+          navigate("/setup/avatar");
+        }else{
+          navigate("/");
+        }
+      }
+      else{
+        setError('Login failed. Please check your email and password.');
+      }
     } catch (error) {
       setError('Login failed. Please check your email and password.');
     }

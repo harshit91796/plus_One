@@ -24,25 +24,8 @@ api.interceptors.request.use(
 );
 
 // API functions
-export const fetchConversations = async () => {
-  try {
-    const response = await api.get('/conversations');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching conversations:', error);
-    throw error;
-  }
-};
 
-export const fetchMessages = async (conversationId: string) => {
-  try {
-    const response = await api.get(`/conversations/${conversationId}/messages`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching messages:', error);
-    throw error;
-  }
-};
+
 
 export const sendMessage = async (chatId: string, content: string) => {
   try {
@@ -150,6 +133,16 @@ export const createPost = async (postData: {
   }
 };
 
+export const updateUser = async ( userData: any) => {
+  try {
+    const response = await api.put(`/auth/update-user`, userData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating user:', error);
+    throw error;
+  } 
+};
+
 export default api;
 
 // New API functions
@@ -182,6 +175,16 @@ export const accessChat = async (userId: string) => {
     return response.data;
   } catch (error) {
     console.error('API accessChat error:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const sendMessageRequest = async (receiverId: string, postId: string, message: string) => {
+  try {
+    const response = await api.post('/convo/send-message-request', { receiverId, postId, message });
+    return response.data;
+  } catch (error) {
+    console.error('Error sending message request:', error.response?.data || error.message);
     throw error;
   }
 };

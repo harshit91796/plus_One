@@ -14,10 +14,16 @@ const Login = () => {
     const userData = { password, username };
     userLogin(userData)
       .then((res) => {
-        const { name, username, avatar, token } = res.data.data;
+        const { name, username, profilePic, token } = res.data.data;
         localStorage.setItem("authToken", token);
-        localStorage.setItem("user", { name, username, avatar });
-        navigate("/");
+        localStorage.setItem("user", { name, username, profilePic });
+        dispatch(setUser({ name, username, profilePic }));
+
+        if (!profilePic) {
+          navigate("/setup/avatar");
+        } else {
+          navigate("/");
+        }
       })
       .catch((e) => console.log(e));
   };

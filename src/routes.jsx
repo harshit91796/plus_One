@@ -1,5 +1,6 @@
-import * as ReactDOM from "react-dom/client";
-import { createBrowserRouter } from "react-router-dom";
+import React from 'react';
+import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 import NickName from "./pages/initialSetup/NickName";
 import Username from "./pages/initialSetup/Username";
@@ -17,106 +18,155 @@ import Religion from "./pages/profileSetup/Religion";
 import TrevelPrefrence from "./pages/profileSetup/TrevelPrefrence";
 import SportsPrefrence from "./pages/profileSetup/SportsPrefrence";
 import Feed from "./pages/homepage/Feed";
-import Login from "./pages/signing/Login";
 import Phone from "./pages/signing/Phone";
 import Otp from "./pages/signing/Otp";
-import ProtectedRoute from "./utils/ProtectedRoute";
 import Chat from "./pages/chat/Chat"
 import AllChats from "./pages/chat/AllChats"
 import ErrDefault from "./components/ErrDefault"
 import Profile from "./pages/user/profile";
+import Login from "./pages/loginSetup/Login";
+import OathCallback from "./pages/loginSetup/OAuthCallback";
+import ConversationPage from "./pages/conversationSetep/ConversationPage";
+import DirectMessagePage from "./pages/conversationSetep/DirectMessagePage";
+import ConvoPage from "./pages/conversationSetep/dummy page/ConvoPage";
+import ChatPage from "./pages/conversationSetep/dummy page/Chat";
+import Register from "./pages/loginSetup/Register";
+
+
+
+
+const ProtectedRoute = ({ children, requireAuth }) => {
+  const user = useSelector((state) => state.user.user);
+
+  if (requireAuth && !user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children ? children : <Outlet />;
+};
+
 export const router = createBrowserRouter([
   {
-    path:'/login',
-    element:<Login/>
-  }, {
-    path:'/phone',
-    element:<Phone/>
+    path: '/register',
+    element: <Register />,
   },
   {
-    path:'/otp',
-    element:<Otp/>
+    path: '/login',
+    element: <Login />,
   },
   {
-    path: "/name",
-    element: <NickName/>,
-  },
-  
-  {
-    path:'/username',
-    element:<Username/>
-  } ,{
-    path:'/birthday',
-    element:<Birthday/>
+    path: '/phone',
+    element: <Phone />,
   },
   {
-    path:'/gender',
-    element:<Gender/>
+    path: '/otp',
+    element: <Otp />,
   },
   {
-    path: "/avatar",
-    element: <UploadAvatar/>,
-  },{
-    path:'/setup',
-    element:<AskSetup/>
+    path: '/',
+    element: <ProtectedRoute requireAuth={false} />,
+    children: [
+      {
+        path: '',
+        element: <Feed />,
+      },
+      {
+        path: 'profile',
+        element: (
+          <ProtectedRoute requireAuth={true}>
+            <Profile />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'conversations',
+        element: (
+          <ProtectedRoute requireAuth={true}>
+            <ConversationPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'conversation/direct/message/:chatId',
+        element: (
+          <ProtectedRoute requireAuth={true}>
+            <DirectMessagePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'chat',
+        element: (
+          <ProtectedRoute requireAuth={true}>
+            <Chat />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'chats',
+        element: (
+          <ProtectedRoute requireAuth={true}>
+            <AllChats />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'upload',
+        element: (
+          <ProtectedRoute requireAuth={true}>
+            <ImageUpload />
+          </ProtectedRoute>
+        ),
+      },
+      // Initial setup routes
+      {
+        path: 'setup',
+        element: <ProtectedRoute requireAuth={true} />,
+        children: [
+          { path: 'nickname', element: <NickName /> },
+          { path: 'username', element: <Username /> },
+          { path: 'avatar', element: <UploadAvatar /> },
+          { path: 'gender', element: <Gender /> },
+          { path: 'ask', element: <AskSetup /> },
+          { path: 'birthday', element: <Birthday /> },
+        ],
+      },
+      // Profile setup routes
+      {
+        path: 'profile-setup',
+        element: <ProtectedRoute requireAuth={true} />,
+        children: [
+          { path: 'interests', element: <Interests /> },
+          { path: 'language', element: <Launguage /> },
+          { path: 'lifestyle', element: <LifeStyle /> },
+          { path: 'movie', element: <MoviePrefrence /> },
+          { path: 'music', element: <MusicPrefrence /> },
+          { path: 'religion', element: <Religion /> },
+          { path: 'travel', element: <TrevelPrefrence /> },
+          { path: 'sports', element: <SportsPrefrence /> },
+        ],
+      },
+    ],
   },
   {
-    path:'/interst',
-    element:<Interests/>
+    path: 'dummy',
+    element: <ProtectedRoute requireAuth={true}>
+      <ConvoPage/>
+    </ProtectedRoute>
   },
   {
-    path:'/launguage',
-    element:<Launguage/>
+    path: 'dummy2',
+    element: <ProtectedRoute requireAuth={true}>
+      <ChatPage/>
+    </ProtectedRoute>
   },
   {
-    path:'/religion',
-    element:<Religion/>
+    path: '*',
+    element: <ErrDefault />,
   },
   {
-    path:'/lifestyle',
-    element:<LifeStyle/>
-  },
-  {
-    path:'/music',
-    element:<MusicPrefrence/>
-  },
-  {
-    path:'/movie',
-    element:<MoviePrefrence/>
-  },
-  {
-    path:'/trevel',
-    element:<TrevelPrefrence/>
-  },
-  {
-    path:'/sports',
-    element:<SportsPrefrence/>
-  },
-  {
-    path:'/',
-    element:  <ProtectedRoute to={<Feed/>}/>
-  },
- 
-  {
-    path:'/profile',
-    element:<Profile/>
-  },
-  {
-    path:'/chat',
-    element:<Chat/>
-  },
-  {
-    path:'/chats',
-    element:<AllChats/>
-  },
-  {
-    path:'/upload',
-    element:<ImageUpload/>
-  },
-  {
-    path:'*',
-    element:<ErrDefault/>
-  },
-
+    path: '/oauth-callback',
+    element: <OathCallback />,
+  }
 ]);
 

@@ -13,6 +13,9 @@ import AddCircleRoundedIcon from "@mui/icons-material/AddCircleRounded";
 import ExploreRoundedIcon from "@mui/icons-material/ExploreRounded";
 import ExploreOutlinedIcon from '@mui/icons-material/ExploreOutlined';
 import PeopleIcon from '@mui/icons-material/People';
+import SettingsIcon from '@mui/icons-material/Settings';
+import LogoutIcon from '@mui/icons-material/Logout';
+import MessageIcon from '@mui/icons-material/Message';
 export {
   HomeIcon,
   SearchIcon,
@@ -27,6 +30,10 @@ export {
   AddCircleRoundedIcon,
   ExploreRoundedIcon,
   ExploreOutlinedIcon,
-PeopleIcon
+PeopleIcon,
+SettingsIcon,
+LogoutIcon,
+MessageIcon,
+
   
 };

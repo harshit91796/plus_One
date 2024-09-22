@@ -46,14 +46,18 @@ const DirectMessagePage: React.FC = () => {
   const socketRef = useRef<any>(null);
   const lastSentMessageRef = useRef<string | null>(null);
 
+  console.log("currentChat",currentChat);
+  
+
   const loadMessages = useCallback(async () => {
     if (!chatId) return;
     setIsLoading(true);
     try {
       const fetchedData = await getMessages(chatId);
-      if (Array.isArray(fetchedData) && fetchedData.length > 0) {
-        dispatch({ type: 'SET_MESSAGES', payload: fetchedData });
-        setCurrentChat(fetchedData[0].chat);
+      if (Array.isArray(fetchedData.messages) && fetchedData.messages.length > 0) {
+        dispatch({ type: 'SET_MESSAGES', payload: fetchedData.messages });
+        console.log("fetchedData",fetchedData);
+        setCurrentChat(fetchedData.chat);
       } else {
         dispatch({ type: 'SET_MESSAGES', payload: [] });
         setCurrentChat(null);
@@ -129,8 +133,27 @@ const DirectMessagePage: React.FC = () => {
   }
 
   return (
-    <div className="direct-message-page">
-      <button className="back-button" onClick={handleBack}>Back to Conversations</button>
+    <div className="chat-container">
+      {/* Header Section */}
+      <div className="chat-header">
+        <div className="profile-info">
+          <img
+            src="https://via.placeholder.com/40"
+            alt={currentChat?.isGroupChat ? currentChat.chatName : currentChat?.users.find((u: any) => u._id !== currentUser._id)?.name}
+            className="profile-pic"
+          />
+          <div className="user-status">
+            <p className="user-name">{currentChat?.isGroupChat ? currentChat.chatName : currentChat?.users.find((u: any) => u._id !== currentUser._id)?.name}</p>
+            <p className="status">Online</p>
+          </div>
+        </div>
+        <div className="header-icons">
+          <button className="icon-button">📞</button>
+          <button className="icon-button">🎥</button>
+        </div>
+      </div>
+
+      {/* Chat Window */}
       {isLoading ? (
         <div>Loading chat...</div>
       ) : currentChat ? (

@@ -1,4 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { RootState } from '../../redux/store';
+import { fetchPosts, createPost, sendMessageRequest } from '../../Api';
+import { fetchPlaceSuggestions } from '../../utils/opencage';
+import Cropper from 'react-easy-crop';
+import { createClient } from '@supabase/supabase-js';
+import { v4 as uuidv4 } from 'uuid'; 
+// import '../../assets/styles/react-easy-crop.css'; // Import the CSS file
 import {
   HomeIcon,
   SearchIcon,
@@ -11,65 +20,450 @@ import {
   AddCircleRoundedIcon,
   ExploreRoundedIcon,
   ExploreOutlinedIcon,
+  SettingsIcon,
+  LogoutIcon,
+  MessageIcon,
 } from "../../assets/Icons";
-import Post from "../../components/Post";
 import { socket } from "../../utils/socket";
-import { postRequest } from "../../utils/service";
-import ImageInput from "../../components/ImageInput";
 import { Link } from "react-router-dom";
-const Feed = () => {
-  const [kk, setkk] = useState("");
-  
+import { useAppDispatch } from '../../redux/hooks/hooks';
+import { clearUser } from '../../redux/user/userSlice';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-console.log(file)
-    setkk(file);
+interface Post {
+  _id: string;
+  user: {
+    _id: string;
+    name: string;
+    avatar?: string;
   };
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append("avatar", kk);
-    postRequest('/user/change-avatar',formData).then(()=>console.log('api requested'))
+  title: string;
+  description: string;
+  location: {
+    type: string;
+    coordinates: number[];
+    formatted: string;
   };
+  image: string[];
+  createdAt: string;
+}
+
+const dummyImages = [
+  "https://images.unsplash.com/photo-1724086575243-6796fc662673?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwzfHx8ZW58MHx8fHx8",
+  "https://plus.unsplash.com/premium_photo-1723983555279-8de1f6e633e3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D",
+  "https://plus.unsplash.com/premium_photo-1706807135398-31770beffb74?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxN3x8fGVufDB8fHx8fA%3D%3D",
+  "https://images.unsplash.com/photo-1724086576041-34e434df9303?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw4fHx8ZW58MHx8fHx8",
+];
+
+// Initialize Supabase client
+
+const supabaseUrl = 'https://ziruawrcztsttxzvlsuz.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppcnVhd3JjenRzdHR4enZsc3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjY5MDUyNjcsImV4cCI6MjA0MjQ4MTI2N30.YIYgAo7Z8Kb2PuLZtYYQaymdjAySWqdnzraa-0Loj20';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const Feed = () => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const user = useSelector((state: RootState) => state.user.user);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newPost, setNewPost] = useState({
+    title: '',
+    description: '',
+    location: '',
+    date: '',
+    peopleNeeded: 0,
+    coordinates: [] as number[],
+    image: [] as string[]
+  });
+  const [messageRequests, setMessageRequests] = useState<{ [key: string]: string }>({});
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [locationSuggestions, setLocationSuggestions] = useState<{ formatted: string, coordinates: { lat: number, lng: number } }[]>([]);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [croppedImageUrl, setCroppedImageUrl] = useState<string | null>(null);
+  const [sentRequests, setSentRequests] = useState<{ [key: string]: boolean }>({});
+
   useEffect(() => {
+    loadPosts();
     socket.on("connect", () => console.log("socket working"));
+    console.log('user:', user);
   }, []);
-  const arr = [
-    "https://images.unsplash.com/photo-1724086575243-6796fc662673?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwzfHx8ZW58MHx8fHx8",
-    "https://plus.unsplash.com/premium_photo-1723983555279-8de1f6e633e3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D",
-    "https://plus.unsplash.com/premium_photo-1706807135398-31770beffb74?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxN3x8fGVufDB8fHx8fA%3D%3D",
-    "https://images.unsplash.com/photo-1724086576041-34e434df9303?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw4fHx8ZW58MHx8fHx8",
-  ];
+
+  const loadPosts = async () => {
+    try {
+      const response = await fetchPosts();
+      if (response.success && Array.isArray(response.posts)) {
+        // Add dummy images to the posts
+        // const postsWithImages = response.posts.map((post, index) => ({
+        //   ...post,
+        //   image: [dummyImages[index % dummyImages.length]]
+        // }));
+        // setPosts(postsWithImages);
+        console.log('response.posts:', response.posts);
+        setPosts(response.posts);
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (err) {
+      console.error('Error loading posts:', err);
+      setError('Failed to load posts. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreatePost = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('newPost:', newPost);
+    try {
+      const response = await createPost(newPost);
+      if (response.success) {
+        setIsModalOpen(false);
+        setNewPost({ title: '', description: '', location: '', date: '', peopleNeeded: 0, coordinates: [], image: [] });
+        loadPosts();
+      } else {
+        throw new Error('Failed to create post');
+      }
+    } catch (err) {
+      console.error('Error creating post:', err);
+      setError('Failed to create post. Please try again.');
+    }
+  };
+
+  const handleMessageRequestChange = (postId: string, message: string) => {
+    setMessageRequests({ ...messageRequests, [postId]: message });
+  };
+
+  const handleSendMessageRequest = async (postId: string, receiverId: string) => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    console.log('postId:', postId);
+    console.log('receiverId:', receiverId);
+    console.log('messageRequests:', messageRequests);
+
+    const message = messageRequests[postId];
+    if (!message) return;
+
+    try {
+      await sendMessageRequest(receiverId, postId, message);
+      setMessageRequests({ ...messageRequests, [postId]: '' });
+      setSentRequests({ ...sentRequests, [postId]: true });
+      toast.success('Message request sent successfully!');
+    } catch (err) {
+      console.error('Error sending message request:', err);
+      setError('Failed to send message request. Please try again.');
+      toast.error('Failed to send message request.');
+    }
+  };
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const handleLogout = () => {
+    dispatch(clearUser());
+    navigate('/login');
+  };
+
+  const handleAuthenticatedAction = (action: () => void) => {
+    if (user) {
+      action();
+    } else {
+      setIsAuthModalOpen(true);
+    }
+  };
+
+  const handleLogin = () => {
+    setIsAuthModalOpen(false);
+    navigate('/login');
+  };
+
+  const handleLocationChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setNewPost({ ...newPost, location: query });
+    if (query.length > 2) {
+      const suggestions = await fetchPlaceSuggestions(query);
+      setLocationSuggestions(suggestions);
+    } else {
+      setLocationSuggestions([]);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion: { formatted: string, coordinates: { lat: number, lng: number } }) => {
+    setNewPost({ 
+      ...newPost, 
+      location: suggestion.formatted,
+      coordinates: [suggestion.coordinates.lng, suggestion.coordinates.lat] // Store coordinates
+    });
+    
+    setLocationSuggestions([]);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+    }
+  };
+
+  const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
+
+  const getCroppedImg = async (imageSrc, pixelCrop) => {
+    const image = await createImage(imageSrc);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = pixelCrop.width;
+    canvas.height = pixelCrop.height;
+
+    ctx.drawImage(
+      image,
+      pixelCrop.x,
+      pixelCrop.y,
+      pixelCrop.width,
+      pixelCrop.height,
+      0,
+      0,
+      pixelCrop.width,
+      pixelCrop.height
+    );
+
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          console.error('Canvas is empty');
+          return;
+        }
+        const fileUrl = URL.createObjectURL(blob);
+        resolve(fileUrl);
+      }, 'image/jpeg');
+    });
+  };
+
+  const handleImageUploadToSupabase = async () => {
+    setSelectedImage(null);
+    console.log('handleImageUploadToSupabase triggered');
+    if (croppedAreaPixels && selectedImage) {
+      const croppedImageUrl = await getCroppedImg(URL.createObjectURL(selectedImage), croppedAreaPixels);
+      setCroppedImageUrl(croppedImageUrl);
+
+      const response = await fetch(croppedImageUrl);
+      const blob = await response.blob();
+      const uniqueFilename = `cropped-image-${uuidv4()}.jpg`; // Generate a unique filename
+      const file = new File([blob], uniqueFilename, { type: 'image/jpeg' });
+
+      const { data, error } = await supabase.storage
+        .from('ghosts')
+        .upload(`public/${file.name}`, file, {
+          cacheControl: '3600',
+          upsert: true,
+        });
+
+      if (error) {
+        console.error('Error uploading image:', error);
+      } else {
+        console.log('Image uploaded to Supabase:', data);
+        const imageUrl = `${supabaseUrl}/storage/v1/object/public/ghosts/${data.path}`;
+        console.log('Image uploaded to Supabase:', imageUrl);
+        setNewPost({ ...newPost, image: [{imageUrl : imageUrl , imageDescription : ''}] });
+        
+        setCroppedImageUrl(null);
+      }
+    }
+  };
+
+  const createImage = (url: string): Promise<HTMLImageElement> => {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.addEventListener('load', () => resolve(image));
+      image.addEventListener('error', (error) => reject(error));
+      image.setAttribute('crossOrigin', 'anonymous'); // to avoid CORS issues
+      image.src = url;
+    });
+  };
+
+  if (loading) return <div>Loading posts...</div>;
+  if (error) return <div>{error}</div>;
+
   return (
     <div className="feedmain">
+      <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
+        <div className="sidebar-header">
+          <h2>Menu</h2>
+          <button onClick={toggleSidebar}>&times;</button>
+        </div>
+        <div className="sidebar-content">
+          <Link to="/settings" className="sidebar-item">
+            <SettingsIcon />
+            <span>Settings</span>
+          </Link>
+          <Link to="/conversations" className="sidebar-item">
+            <MessageIcon />
+            <span>Messages</span>
+          </Link>
+          <button onClick={handleLogout} className="sidebar-item logout-button">
+            <LogoutIcon />
+            <span>Logout</span>
+          </button>
+        </div>
+      </div>
       <div className="feed">
-       
-
         <div className="feedTop">
-          <AutoAwesomeMosaicIcon />
+          <AutoAwesomeMosaicIcon onClick={toggleSidebar} />
           <h2>Logo</h2>
-          <span><ExploreOutlinedIcon/> <NotificationsNoneIcon />  </span>
-         
+          <span>
+            <ExploreOutlinedIcon/> 
+            <NotificationsNoneIcon />
+          </span>
         </div>
 
-        {arr.map((i) => (
-          <Post url={i} />
+        {posts.map((post) => (
+          <div key={post._id} className="post-container">
+            <div className="imgcorosel">
+              {post.image && post.image.length > 0 && (
+                <div className="img-container">
+                  <img src={post.image[0].imageUrl} alt="Post" />
+                  <div className="text-container">
+                    <h4>{post.title}</h4>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="post-container-bottom">
+              <div className="user-info">
+                <img src={post.user.profilePic || 'default-avatar.png'} alt={post.user.name} />
+                <div>
+                  <h3>{post.user.name}</h3>
+                  <h5>{post.location.formatted}</h5>
+                </div>
+              </div>
+              <p>{post.description}</p>
+              {user && !sentRequests[post._id] && !post.requests.some(request => request.user === user._id) && (
+                <div className="message-request-box">
+                  <input
+                    type="text"
+                    placeholder="Send a message to join this group"
+                    value={messageRequests[post._id] || ''}
+                    onChange={(e) => handleMessageRequestChange(post._id, e.target.value)}
+                  />
+                  <button onClick={() => handleSendMessageRequest(post._id, post.user._id)}>Send Request</button>
+                </div>
+              )}
+            </div>
+          </div>
         ))}
       </div>
       <footer>
         <HomeIcon />
-        <AddCircleRoundedIcon/>
+        <AddCircleRoundedIcon onClick={() => handleAuthenticatedAction(() => setIsModalOpen(true))} />
         <SearchIcon />
-        {/* <Link to="/chat">
-          <ChatIcon />
-        </Link> */}
-        {/* <AccountBoxIcon /> */}
         <Link to="/profile">
-        <AccountCircleRoundedIcon/>
+          <AccountCircleRoundedIcon/>
         </Link>
-        
       </footer>
+
+      {isModalOpen && user && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2>Create New Post</h2>
+            <form onSubmit={handleCreatePost}>
+              <input
+                type="text"
+                placeholder="Title"
+                value={newPost.title}
+                onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
+                required
+              />
+              <textarea
+                placeholder="Description"
+                value={newPost.description}
+                onChange={(e) => setNewPost({ ...newPost, description: e.target.value })}
+                required
+              ></textarea>
+              <input
+                type="text"
+                placeholder="Location"
+                value={newPost.location}
+                onChange={handleLocationChange}
+                required
+              />
+              {locationSuggestions.length > 0 && (
+                <ul className="suggestions-list">
+                  {locationSuggestions.map((suggestion, index) => (
+                    <li key={index} onClick={() => handleSuggestionClick(suggestion)}>
+                      {suggestion.formatted}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <input
+                type="date"
+                placeholder="Date"
+                value={newPost.date}
+                onChange={(e) => setNewPost({ ...newPost, date: e.target.value })}
+                required
+              />
+              <input
+                type="number"
+                placeholder="People Needed"
+                value={newPost.peopleNeeded}
+                onChange={(e) => setNewPost({ ...newPost, peopleNeeded: parseInt(e.target.value) })}
+                required
+              />
+              <input type="file" accept="image/*" onChange={handleImageUpload} />
+              {selectedImage && (
+                <div className="crop-container">
+                  <Cropper
+                    image={URL.createObjectURL(selectedImage)}
+                    crop={crop}
+                    zoom={zoom}
+                    aspect={1}
+                    onCropChange={setCrop}
+                    onZoomChange={setZoom}
+                    onCropComplete={onCropComplete}
+                  />
+                  <button type="button" onClick={handleImageUploadToSupabase}>Upload Image</button>
+                </div>
+              )}
+              {croppedImageUrl && (
+                <div>
+                  <img src={croppedImageUrl} alt="Cropped" />
+                </div>
+              )}
+              <div className="modal-buttons">
+                <button type="submit">Create Post</button>
+                <button type="button" onClick={() => setIsModalOpen(false)}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isAuthModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2>Authentication Required</h2>
+            <p>Please log in to perform this action.</p>
+            <div className="modal-buttons">
+              <button onClick={handleLogin}>Log In</button>
+              <button onClick={() => setIsAuthModalOpen(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ToastContainer />
     </div>
   );
 };

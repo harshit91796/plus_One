@@ -15,14 +15,13 @@ import { RouterProvider,
 import {router} from './routes';
 import { store } from './redux/store'
 import { Provider } from 'react-redux'
-import Loading from "./components/Loading";
+// import Loading from "./components/Loading";
 
 
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <Provider store={store}>
-      <Loading/>
     <RouterProvider router={router} />
   </Provider>,
    
