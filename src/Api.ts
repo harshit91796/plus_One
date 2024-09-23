@@ -189,6 +189,26 @@ export const sendMessageRequest = async (receiverId: string, postId: string, mes
   }
 };
 
+export const getMessageRequest = async (requestId: string) => {
+  try {
+    const response = await api.post('/convo/message-request' , {requestId});
+    return response.data;
+  } catch (error) {
+    console.error('Error getting message requests:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const handleMessageRequest = async (requestId: string , action: string) => {
+  try {
+    const response = await api.post('/convo/handle-message-request', { requestId , action});
+    return response.data;
+  } catch (error) {
+    console.error('Error accepting request:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
 export const searchUsers = async (query: string) => {
   try {
     const response = await api.get(`/searchUsers?search=${query}`);

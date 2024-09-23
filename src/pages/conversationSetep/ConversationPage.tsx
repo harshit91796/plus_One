@@ -19,6 +19,19 @@ const ConversationPage: React.FC = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTab, setSelectedTab] = useState<'general' | 'groups' | 'requests'>('general');
+  const [filteredChats, setFilteredChats] = useState([]);
+
+
+  useEffect(() => {
+    if (selectedTab === 'general') {
+      setFilteredChats(chats.filter(chat => chat.isTemporary === false && chat.isGroupChat === false));
+    } else if (selectedTab === 'groups') {
+      setFilteredChats(chats.filter(chat => chat.isTemporary === false && chat.isGroupChat === true));
+    } else if (selectedTab === 'requests') {
+      setFilteredChats(chats.filter(chat => chat.isTemporary === true ));
+    }
+  }, [selectedTab, chats]);
 
   const loadChats = useCallback(async () => {
     console.log('ConversationPage: Loading chats');
@@ -192,15 +205,15 @@ const ConversationPage: React.FC = () => {
 
       {/* Tabs Section */}
       <div className="tabs">
-        <button className="tab active">General</button>
-        <button className="tab">Groups</button>
-        <button className="tab">Requests</button>
+         <button className={`tab ${selectedTab === 'general' ? 'active' : ''}`} onClick={() => setSelectedTab('general')}>General</button>
+        <button className={`tab ${selectedTab === 'groups' ? 'active' : ''}`} onClick={() => setSelectedTab('groups')}>Groups</button>
+        <button className={`tab ${selectedTab === 'requests' ? 'active' : ''}`} onClick={() => setSelectedTab('requests')}>Requests</button>
       </div>
 
       {/* Chat List */}
       <div className="chat-list">
         <ConversationList
-          chats={chats}
+          chats={filteredChats}
           onSelectChat={handleSelectChat}
           selectedChatId={selectedChatId}
           user={user}

@@ -2,7 +2,7 @@ import React, { useReducer, useEffect, useCallback, useRef, useState, useMemo } 
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import ChatWindow from './ChatWindow';
-import { getMessages, sendMessage } from '../../Api';
+import { getMessageRequest, getMessages, handleMessageRequest, sendMessage } from '../../Api';
 import { initSocket, joinChatRoom, leaveRoom, onMessageReceived, socketSendMessage } from '../../socket';
 import './DirectMessage.css';
 
@@ -45,8 +45,22 @@ const DirectMessagePage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const socketRef = useRef<any>(null);
   const lastSentMessageRef = useRef<string | null>(null);
+  const [messageRequest, setMessageRequest] = useState<any>(null);
 
-  console.log("currentChat",currentChat);
+  console.log("currentchat",currentChat);
+  
+  // useEffect(() => {
+  //   const fetchMessageRequest = async () => {
+  //     try {
+  //       const response = await getMessageRequest(currentChat.messageRequest);
+  //       console.log("request response",response);
+  //       setMessageRequest(response.messageRequest);
+  //     } catch (error) {
+  //       console.error('Error fetching message request:', error);
+  //     }
+  //   };
+  //   fetchMessageRequest();
+  // }, [currentChat]);
   
 
   const loadMessages = useCallback(async () => {
@@ -54,6 +68,13 @@ const DirectMessagePage: React.FC = () => {
     setIsLoading(true);
     try {
       const fetchedData = await getMessages(chatId);
+      console.log(fetchedData.chat.messageRequests);
+      if(fetchedData.chat.messageRequests){
+        const requestResponse = await getMessageRequest(fetchedData.chat.messageRequests);
+        console.log("requestResponse",requestResponse);
+        setMessageRequest(requestResponse);
+        
+      }
       if (Array.isArray(fetchedData.messages) && fetchedData.messages.length > 0) {
         dispatch({ type: 'SET_MESSAGES', payload: fetchedData.messages });
         console.log("fetchedData",fetchedData);
@@ -132,6 +153,15 @@ const DirectMessagePage: React.FC = () => {
     return <div>Loading user...</div>;
   }
 
+  const handleAccept = async () => {
+    console.log("accept");
+    const response = await handleMessageRequest(currentChat.messageRequests , "accept");
+    console.log("response",response);
+    if(response.success){
+      loadMessages();
+    }    
+  }
+
   return (
     <div className="chat-container">
       {/* Header Section */}
@@ -151,6 +181,23 @@ const DirectMessagePage: React.FC = () => {
           <button className="icon-button">📞</button>
           <button className="icon-button">🎥</button>
         </div>
+        
+       
+
+      </div>
+
+      { currentChat?.isTemporary && messageRequest.messageRequest.status === "pending" && messageRequest.messageRequest.sender._id !== currentUser._id && (
+          <div className='temporary-chat-icons'>
+          <button className="icon-button" onClick={handleAccept}>Accept </button>
+          <button className='icon-button'>Decline</button>
+          </div>
+         )}
+
+      {/* Back button */}
+      <div className="back-button" onClick={handleBack}>
+        <i className="fas fa-arrow-left">
+          <span className='back-button-text'>Back</span>
+        </i>
       </div>
 
       {/* Chat Window */}
