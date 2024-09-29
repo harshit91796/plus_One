@@ -5,6 +5,7 @@ import ChatWindow from './ChatWindow';
 import { getMessageRequest, getMessages, handleMessageRequest, sendMessage } from '../../Api';
 import { initSocket, joinChatRoom, leaveRoom, onMessageReceived, socketSendMessage } from '../../socket';
 import './DirectMessage.css';
+import { ArrowBackIos } from '@mui/icons-material';
 
 interface Message {
   _id: string;
@@ -149,6 +150,7 @@ const DirectMessagePage: React.FC = () => {
     <div className="chat-container">
       {/* Header Section */}
       <div className="chat-header">
+      <ArrowBackIos onClick={() => navigate('/conversations')} />
         <div className="profile-info">
           {currentChat && currentChat.users && (
             <img

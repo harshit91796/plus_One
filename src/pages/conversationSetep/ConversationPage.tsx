@@ -9,6 +9,8 @@ import './Conversation.css';
 import { initSocket, joinChatRoom, leaveRoom, socketSendMessage as socketSendMessage, onMessageReceived, disconnectSocket } from '../../socket';
 // import { Modal } from '@mui/material';
 import Modal from 'react-modal';
+import { IoArrowBackCircleOutline } from 'react-icons/io5';
+import { ArrowBackIos } from '@mui/icons-material';
 
 const ConversationPage: React.FC = () => {
   const navigate = useNavigate();
@@ -216,7 +218,10 @@ const ConversationPage: React.FC = () => {
   return (
     <div className={`chat-container ${darkMode ? 'dark-mode' : ''}`}>
       {/* Header Section */}
+      
+
       <div className="chat-header">
+      <ArrowBackIos onClick={() => navigate('/')} />
         <h1>Chats</h1>
         <i className="fas fa-search"></i>
       </div>
