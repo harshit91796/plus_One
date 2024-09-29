@@ -33,8 +33,12 @@ export const sendMessage = async (chatId: string, content: string, fileUrl: stri
     const response = await api.post('/convo/message', { chatId, content, mediaUrl: fileUrl, contentType: fileType });
     console.log('API sendMessage response:', response.data);
     return response.data;
-  } catch (error) {
-    console.error('API sendMessage error:', error.response?.data || error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+    } else {
+      console.error('An unknown error occurred');
+    }
     throw error;
   }
 };
@@ -43,8 +47,12 @@ export const createConversation = async (participants: string[]) => {
   try {
     const response = await api.post('/conversations', { participants });
     return response.data;
-  } catch (error) {
-    console.error('Error creating conversation:', error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+    } else {
+      console.error('An unknown error occurred');
+    }
     throw error;
   }
 };
@@ -53,8 +61,12 @@ export const updateConversation = async (conversationId: string, data: any) => {
   try {
     const response = await api.put(`/conversations/${conversationId}`, data);
     return response.data;
-  } catch (error) {
-    console.error('Error updating conversation:', error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+    } else {
+      console.error('An unknown error occurred');
+    }
     throw error;
   }
 };
@@ -63,8 +75,12 @@ export const deleteConversation = async (conversationId: string) => {
   try {
     const response = await api.delete(`/conversations/${conversationId}`);
     return response.data;
-  } catch (error) {
-    console.error('Error deleting conversation:', error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+    } else {
+      console.error('An unknown error occurred');
+    }
     throw error;
   }
 };
@@ -78,8 +94,12 @@ export const login = async (email: string, password: string) => {
     console.log('Setting auth token in localStorage:', response.data.token);
     localStorage.setItem('authToken', response.data.token);
     return response.data; // This should include the user data
-  } catch (error) {
-    console.error('Error in login API call:', error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+    } else {
+      console.error('An unknown error occurred');
+    }
     throw error;
   }
 };
@@ -88,8 +108,12 @@ export const register = async (userData: any) => {
   try {
     const response = await api.post('/auth/register', userData);
     return response.data;
-  } catch (error) {
-    console.error('Error registering:', error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+    } else {
+      console.error('An unknown error occurred');
+    }
     throw error;
   }
 };
@@ -112,8 +136,12 @@ export const logout = async () => {
 
     // You might want to clear the Redux store as well
     // This should be done where you call this logout function
-  } catch (error) {
-    console.error('Error during logout:', error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+    } else {
+      console.error('An unknown error occurred');
+    }
     throw error;
   }
 };
@@ -128,8 +156,12 @@ export const createPost = async (postData: {
   try {
     const response = await api.post('/post/create-post', postData);
     return response.data;
-  } catch (error) {
-    console.error('Error creating post:', error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+    } else {
+      console.error('An unknown error occurred');
+    }
     throw error;
   }
 };
@@ -138,8 +170,12 @@ export const updateUser = async ( userData: any) => {
   try {
     const response = await api.put(`/auth/update-user`, userData);
     return response.data;
-  } catch (error) {
-    console.error('Error updating user:', error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+    } else {
+      console.error('An unknown error occurred');
+    }
     throw error;
   } 
 };
@@ -152,8 +188,12 @@ export const getChats = async () => {
     const response = await api.get('/convo/getChats');
     console.log('API getChats response:', response.data);
     return response.data;
-  } catch (error) {
-    console.error('API getChats error:', error.response?.data || error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+    } else {
+      console.error('An unknown error occurred');
+    }
     throw error;
   }
 };
@@ -163,8 +203,12 @@ export const getMessages = async (chatId: string) => {
     const response = await api.get(`/convo/getMessages/${chatId}`);
     console.log('API getMessages response:', response.data);
     return response.data;
-  } catch (error) {
-    console.error('API getMessages error:', error.response?.data || error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+    } else {
+      console.error('An unknown error occurred');
+    }
     throw error;
   }
 };
@@ -174,8 +218,12 @@ export const accessChat = async (userId: string) => {
     const response = await api.post('/convo/accessChat', { userId });
     console.log('API accessChat response:', response.data);
     return response.data;
-  } catch (error) {
-    console.error('API accessChat error:', error.response?.data || error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+    } else {
+      console.error('An unknown error occurred');
+    }
     throw error;
   }
 };
@@ -186,8 +234,12 @@ export const sendMessageRequest = async (receiverId: string, postId: string, mes
     const response = await api.post('/convo/send-message-request', { receiverId, postId, message });
     console.log('API sendMessageRequest response:', response);
     return response.data;
-  } catch (error) {
-    console.error('Error sending message request:', error.response?.data || error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+    } else {
+      console.error('An unknown error occurred');
+    }
     throw error;
   }
 };
@@ -196,8 +248,12 @@ export const getMessageRequest = async (requestId: string) => {
   try {
     const response = await api.post('/convo/message-request' , {requestId});
     return response.data;
-  } catch (error) {
-    console.error('Error getting message requests:', error.response?.data || error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+    } else {
+      console.error('An unknown error occurred');
+    }
     throw error;
   }
 };
@@ -206,8 +262,12 @@ export const handleMessageRequest = async (requestId: string , action: string) =
   try {
     const response = await api.post('/convo/handle-message-request', { requestId , action});
     return response.data;
-  } catch (error) {
-    console.error('Error accepting request:', error.response?.data || error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+    } else {
+      console.error('An unknown error occurred');
+    }
     throw error;
   }
 };
@@ -217,8 +277,12 @@ export const searchUsers = async (query: string) => {
     const response = await api.get(`/searchUsers?search=${query}`);
     console.log('API searchUsers response:', response.data);
     return response.data;
-  } catch (error) {
-    console.error('API searchUsers error:', error.response?.data || error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+    } else {
+      console.error('An unknown error occurred');
+    }
     throw error;
   }
 };
@@ -227,8 +291,12 @@ export const sendOtp = async (phoneNumber: string) => {
   try {
     const response = await api.post('/auth/send-otp', { phoneNumber });
     return response.data;
-  } catch (error) {
-    console.error('Error sending OTP:', error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+    } else {
+      console.error('An unknown error occurred');
+    }
     throw error;
   }
 };
@@ -238,8 +306,12 @@ export const verifyOtp = async (phoneNumber: string, otp: string) => {
     const response = await api.post('/auth/verify-otp', { phoneNumber, otp });
     localStorage.setItem('authToken', response.data.token);
     return response.data;
-  } catch (error) {
-    console.error('Error verifying OTP:', error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+    } else {
+      console.error('An unknown error occurred');
+    }
     throw error;
   }
 };
@@ -248,8 +320,12 @@ export const fetchPosts = async () => {
   try {
     const response = await api.get('/post/feed');
     return response.data;
-  } catch (error) {
-    console.error('Error fetching posts:', error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+    } else {
+      console.error('An unknown error occurred');
+    }
     throw error;
   }
 };
