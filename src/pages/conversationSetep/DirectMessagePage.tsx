@@ -9,6 +9,8 @@ import './DirectMessage.css';
 interface Message {
   _id: string;
   content: string;
+  contentType: 'text' | 'image' | 'video' | 'audio';
+  mediaUrl?: string;
   sender: {
     _id: string;
     name: string;
@@ -47,41 +49,21 @@ const DirectMessagePage: React.FC = () => {
   const lastSentMessageRef = useRef<string | null>(null);
   const [messageRequest, setMessageRequest] = useState<any>(null);
 
-  console.log("currentchat",currentChat);
-  
-  // useEffect(() => {
-  //   const fetchMessageRequest = async () => {
-  //     try {
-  //       const response = await getMessageRequest(currentChat.messageRequest);
-  //       console.log("request response",response);
-  //       setMessageRequest(response.messageRequest);
-  //     } catch (error) {
-  //       console.error('Error fetching message request:', error);
-  //     }
-  //   };
-  //   fetchMessageRequest();
-  // }, [currentChat]);
-  
-
   const loadMessages = useCallback(async () => {
     if (!chatId) return;
     setIsLoading(true);
     try {
       const fetchedData = await getMessages(chatId);
-      console.log(fetchedData.chat.messageRequests);
-      if(fetchedData.chat.messageRequests){
+      if (fetchedData.chat.messageRequests) {
         const requestResponse = await getMessageRequest(fetchedData.chat.messageRequests);
-        console.log("requestResponse",requestResponse);
-        setMessageRequest(requestResponse);
-        
+        setMessageRequest(requestResponse.messageRequest);
       }
       if (Array.isArray(fetchedData.messages) && fetchedData.messages.length > 0) {
         dispatch({ type: 'SET_MESSAGES', payload: fetchedData.messages });
-        console.log("fetchedData",fetchedData);
         setCurrentChat(fetchedData.chat);
       } else {
         dispatch({ type: 'SET_MESSAGES', payload: [] });
-        setCurrentChat(null);
+        setCurrentChat(fetchedData.chat);
       }
     } catch (error) {
       console.error('Error loading messages:', error);
@@ -113,19 +95,22 @@ const DirectMessagePage: React.FC = () => {
     }
   }, [currentUser, chatId, loadMessages]);
 
-  const handleSendMessage = useCallback(async (content: string) => {
+  const handleSendMessage = useCallback(async (chatId: string, content: string, fileUrl: string, fileType: string) => {
+    console.log('handleSendMessage function called with:', 'fileType:', fileType ,"fileUrl:", fileUrl , "content:", content , "chatId:", chatId);
     if (!chatId) return;
     const tempId = Date.now().toString();
     const tempMessage: Message = {
       _id: tempId,
       content,
+      contentType: fileType || 'text',
+      mediaUrl: fileUrl,
       sender: currentUser,
       createdAt: new Date().toISOString(),
     };
     lastSentMessageRef.current = tempId;
     dispatch({ type: 'ADD_MESSAGE', payload: tempMessage });
     try {
-      const response = await sendMessage(chatId, content);
+      const response = await sendMessage(chatId, content, fileUrl, fileType);
       socketSendMessage({
         ...response,
         chat: { _id: chatId, users: currentChat.users }
@@ -154,26 +139,34 @@ const DirectMessagePage: React.FC = () => {
   }
 
   const handleAccept = async () => {
-    console.log("accept");
-    const response = await handleMessageRequest(currentChat.messageRequests , "accept");
-    console.log("response",response);
-    if(response.success){
+    const response = await handleMessageRequest(currentChat.messageRequests, "accept");
+    if (response.success) {
       loadMessages();
-    }    
-  }
+    }
+  };
 
   return (
     <div className="chat-container">
       {/* Header Section */}
       <div className="chat-header">
         <div className="profile-info">
-          <img
-            src="https://via.placeholder.com/40"
-            alt={currentChat?.isGroupChat ? currentChat.chatName : currentChat?.users.find((u: any) => u._id !== currentUser._id)?.name}
-            className="profile-pic"
-          />
+          {currentChat && currentChat.users && (
+            <img
+              src={currentChat.isGroupChat 
+                ? currentChat.profilePic || currentChat.users.find((u: any) => u._id === currentUser._id)?.profilePic 
+                : currentChat.users.find((u: any) => u._id !== currentUser._id)?.profilePic || 'https://via.placeholder.com/40'}
+              alt={currentChat.isGroupChat 
+                ? currentChat.chatName 
+                : currentChat.users.find((u: any) => u._id !== currentUser._id)?.name}
+              className="profile-pic"
+            />
+          )}
           <div className="user-status">
-            <p className="user-name">{currentChat?.isGroupChat ? currentChat.chatName : currentChat?.users.find((u: any) => u._id !== currentUser._id)?.name}</p>
+            <p className="user-name">
+              {currentChat?.isGroupChat 
+                ? currentChat.chatName 
+                : currentChat?.users?.find((u: any) => u._id !== currentUser._id)?.name}
+            </p>
             <p className="status">Online</p>
           </div>
         </div>
@@ -181,17 +174,14 @@ const DirectMessagePage: React.FC = () => {
           <button className="icon-button">📞</button>
           <button className="icon-button">🎥</button>
         </div>
-        
-       
-
       </div>
 
-      { currentChat?.isTemporary && messageRequest.messageRequest.status === "pending" && messageRequest.messageRequest.sender._id !== currentUser._id && (
-          <div className='temporary-chat-icons'>
-          <button className="icon-button" onClick={handleAccept}>Accept </button>
+      {currentChat?.isTemporary && messageRequest?.status === "pending" && messageRequest?.sender._id !== currentUser._id && (
+        <div className='temporary-chat-icons'>
+          <button className="icon-button" onClick={handleAccept}>Accept</button>
           <button className='icon-button'>Decline</button>
-          </div>
-         )}
+        </div>
+      )}
 
       {/* Back button */}
       <div className="back-button" onClick={handleBack}>

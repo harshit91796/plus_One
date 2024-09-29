@@ -77,9 +77,12 @@
   margin-bottom: 15px;
   padding: 10px;
   border-radius: 20px;
+  
 }
 
 .message.user {
+  display: flex;
+  flex-direction: column;
   align-self: flex-end;
   /* background-color: #0084ff;
    */

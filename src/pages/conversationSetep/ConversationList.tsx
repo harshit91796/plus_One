@@ -32,7 +32,7 @@ const ConversationList: React.FC<ConversationListProps> = ({ chats, selectedChat
           to={`/conversation/direct/message/${chat._id}`}
           className={`chat-item ${chat._id === selectedChatId ? 'selected' : ''}`}
         >
-          <img src={chat.isGroupChat ? 'group.png' : `user${Math.floor(Math.random() * 4) + 1}.png`} alt={chat.chatName} className="chat-avatar" />
+          <img src={chat?.isGroupChat ? chat.isGroupChat.profilePic ? chat.isGroupChat.profilePic : chat.users.find(u => u._id == user._id)?.profilePic : chat.users.find(u => u._id !== user._id)?.profilePic} alt={chat.chatName} className="chat-avatar" />
           <div className="chat-info">
             <p className="chat-name">{chat.isGroupChat ? chat.chatName : chat.users.find(u => u._id !== user._id)?.name}</p>
             <p className="chat-message">{chat.latestMessage ? chat.latestMessage.content : 'No messages yet'}</p>

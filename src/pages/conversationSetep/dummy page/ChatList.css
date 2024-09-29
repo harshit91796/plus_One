@@ -1,4 +1,4 @@
-.chat-container {
+/* .chat-container {
     width: 100%;
     max-width: 400px;
     margin: 0 auto;
@@ -6,7 +6,7 @@
     font-family: Arial, sans-serif;
   }
   
-  /* Header */
+
   .chat-header {
     display: flex;
     justify-content: space-between;
@@ -23,7 +23,7 @@
     font-size: 20px;
   }
   
-  /* Story Section */
+  
   .story-section {
     display: flex;
     overflow-x: auto;
@@ -57,7 +57,7 @@
     font-size: 12px;
   }
   
-  /* Tabs */
+ 
   .tabs {
     display: flex;
     justify-content: space-around;
@@ -79,7 +79,7 @@
     border-radius: 15px;
   }
   
-  /* Chat List */
+
   .chat-list {
     padding: 10px;
   }
@@ -130,7 +130,7 @@
     font-size: 12px;
   }
   
-  /* Bottom Navigation */
+  
   .bottom-nav {
     display: flex;
     justify-content: space-around;
@@ -152,7 +152,7 @@
     font-size: 16px;
   }
   
-  /* Responsive Design */
+  
   @media (max-width: 768px) {
     .chat-header h1 {
       font-size: 18px;
@@ -171,4 +171,4 @@
       font-size: 14px;
     }
   }
-  
+   */

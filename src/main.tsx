@@ -15,6 +15,8 @@ import { RouterProvider,
 import {router} from './routes';
 import { store } from './redux/store'
 import { Provider } from 'react-redux'
+import Layout from "./components/Layout";
+import DarkModeToggle from "./components/DarkModeToggle";
 // import Loading from "./components/Loading";
 
 
@@ -22,8 +24,10 @@ import { Provider } from 'react-redux'
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <Provider store={store}>
-    <RouterProvider router={router} />
-  </Provider>,
+    
+        <RouterProvider router={router} />
+      
+    </Provider>,
    
   </React.StrictMode>
 );

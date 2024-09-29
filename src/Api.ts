@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base URL for your API
-const API_BASE_URL = 'http://localhost:3007/api';
+const API_BASE_URL = 'https://fluoridated-silicon-birch.glitch.me/api';
 
 // Create an axios instance with default config
 const api = axios.create({
@@ -27,9 +27,10 @@ api.interceptors.request.use(
 
 
 
-export const sendMessage = async (chatId: string, content: string) => {
+export const sendMessage = async (chatId: string, content: string, fileUrl: string, fileType: string) => {
+  console.log('API sendMessage function called with:', 'chatId:', chatId, 'content:', content, 'fileUrl:', fileUrl, 'fileType:', fileType);
   try {
-    const response = await api.post('/convo/message', { chatId, content });
+    const response = await api.post('/convo/message', { chatId, content, mediaUrl: fileUrl, contentType: fileType });
     console.log('API sendMessage response:', response.data);
     return response.data;
   } catch (error) {
@@ -180,8 +181,10 @@ export const accessChat = async (userId: string) => {
 };
 
 export const sendMessageRequest = async (receiverId: string, postId: string, message: string) => {
+  console.log("request data", receiverId, postId, message)
   try {
     const response = await api.post('/convo/send-message-request', { receiverId, postId, message });
+    console.log('API sendMessageRequest response:', response);
     return response.data;
   } catch (error) {
     console.error('Error sending message request:', error.response?.data || error.message);

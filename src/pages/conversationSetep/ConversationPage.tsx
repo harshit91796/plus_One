@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ConversationList from './ConversationList';
-import ChatWindow from './ChatWindow';
-import { getChats, getMessages, accessChat, searchUsers, sendMessage as apiSendMessage, logout } from '../../Api';
+import { getChats, getMessages, accessChat, searchUsers, sendMessage as  logout } from '../../Api';
+import { sendMessageRequest } from '../../Api';
 import { useAppSelector, useAppDispatch } from '../../redux/hooks/hooks';
 import { setUser, clearUser } from '../../redux/user/userSlice';
 import './Conversation.css';
 import { initSocket, joinChatRoom, leaveRoom, socketSendMessage as socketSendMessage, onMessageReceived, disconnectSocket } from '../../socket';
+// import { Modal } from '@mui/material';
+import Modal from 'react-modal';
+
 
 const ConversationPage: React.FC = () => {
   const navigate = useNavigate();
@@ -21,7 +24,21 @@ const ConversationPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState<'general' | 'groups' | 'requests'>('general');
   const [filteredChats, setFilteredChats] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const darkMode = useAppSelector((state) => state.theme.darkMode);
 
+  Modal.setAppElement('#root');
+
+  const customStyles = {
+    content: {
+      top: '50%',
+      left: '50%',
+      right: 'auto',
+      bottom: 'auto',
+      marginRight: '-50%',
+      transform: 'translate(-50%, -50%)',
+    },
+  };
 
   useEffect(() => {
     if (selectedTab === 'general') {
@@ -135,25 +152,43 @@ const ConversationPage: React.FC = () => {
       try {
         const results = await searchUsers(query);
         setSearchResults(results);
+        
       } catch (error) {
         console.error('Error searching users:', error);
         setError('Failed to search users. Please try again.');
       }
     } else {
       setSearchResults([]);
+      setIsModalOpen(false);
+      setSearchQuery('');
     }
   };
 
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSearchQuery('');
+    setSearchResults([]);
+  };
+
+
   const handleSelectSearchResult = async (userId: string) => {
-    setError(null);
+    // setError(null);
     try {
-      const chat = await accessChat(userId);
-      if (!chats.find(c => c._id === chat._id)) {
-        setChats([chat, ...chats]);
+      // const chat = await accessChat(userId);
+      const existingChat = chats.find(c => c.users.some(user => user._id === userId));
+      if (existingChat) {
+        setSelectedChatId(existingChat._id);
+        navigate(`/conversation/direct/message/${existingChat._id}`);
+      } else {
+        const chat = await sendMessageRequest(userId);
+        console.log("chatRequest",chat);
+        setSelectedChatId(chat._id);
+        setIsModalOpen(false);
+        setSearchResults([]);
+        navigate(`/conversation/direct/message/${chat._id}`);
       }
-      setSelectedChatId(chat._id);
-      setSearchQuery('');
-      setSearchResults([]);
+     
+     
     } catch (error) {
       console.error('Error accessing chat:', error);
       setError('Failed to access chat. Please try again.');
@@ -180,7 +215,7 @@ const ConversationPage: React.FC = () => {
   }
 
   return (
-    <div className="chat-container">
+    <div className={`chat-container ${darkMode ? 'dark-mode' : ''}`}>
       {/* Header Section */}
       <div className="chat-header">
         <h1>Chats</h1>
@@ -204,7 +239,7 @@ const ConversationPage: React.FC = () => {
       </div>
 
       {/* Tabs Section */}
-      <div className="tabs">
+      <div className={`tabs ${darkMode ? 'dark-mode' : ''}`}>
          <button className={`tab ${selectedTab === 'general' ? 'active' : ''}`} onClick={() => setSelectedTab('general')}>General</button>
         <button className={`tab ${selectedTab === 'groups' ? 'active' : ''}`} onClick={() => setSelectedTab('groups')}>Groups</button>
         <button className={`tab ${selectedTab === 'requests' ? 'active' : ''}`} onClick={() => setSelectedTab('requests')}>Requests</button>
@@ -221,11 +256,39 @@ const ConversationPage: React.FC = () => {
       </div>
 
       {/* Bottom Navigation */}
-      <div className="bottom-nav">
+      <div className={`bottom-nav ${darkMode ? 'dark-mode' : ''}`}>
         <i className="fas fa-home"></i>
-        <button className="new-chat-btn">+ New Chat</button>
+        <button className="new-chat-btn" onClick={() => setIsModalOpen(true)}>+ New Chat</button>
         <i className="fas fa-bars"></i>
       </div>
+
+       {/* Search Modal */}
+       <Modal
+        isOpen={isModalOpen}
+        onRequestClose={handleCloseModal}
+        contentLabel="Search Users"
+        className={`search-modal ${darkMode ? 'dark-mode' : ''}`}
+        overlayClassName="search-modal-overlay"
+        
+      >
+        <h2>Search Users</h2>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={handleSearch}
+          placeholder="Search for users..."
+        />
+        <ul className="search-results">
+          {searchResults.map((result) => (
+            <li key={result._id} onClick={() => handleSelectSearchResult(result._id)}>
+                <div className='search-result-container'>
+                <img src={result.profilePic} style={{width: '50px', height: '50px'}} alt={result.username} />
+                <span style={{color: darkMode ? 'white' : 'black'}} className={`search-result-username ${darkMode ? 'dark-mode' : ''}`}>{result.name}</span>
+                </div>
+            </li>
+          ))}
+        </ul>
+      </Modal>
     </div>
   );
 };

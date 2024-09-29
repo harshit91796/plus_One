@@ -7,6 +7,10 @@ import { fetchPlaceSuggestions } from '../../utils/opencage';
 import Cropper from 'react-easy-crop';
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid'; 
+import { WbSunnyIcon ,ModeNightIcon, ModeNight, Surfing, LightMode, Diversity2 } from '@mui/icons-material';
+import blunt2 from '../../../../../../images/blunt2-removebg.png';
+import blunt from '../../../../../../images/blunt.jpg';
+
 // import '../../assets/styles/react-easy-crop.css'; // Import the CSS file
 import {
   HomeIcon,
@@ -30,6 +34,9 @@ import { useAppDispatch } from '../../redux/hooks/hooks';
 import { clearUser } from '../../redux/user/userSlice';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useAppSelector } from '../../redux/hooks/hooks';
+import { toggleDarkMode } from '../../redux/theme/themeSlice';
+import DarkModeToggle from "../../components/DarkModeToggle";
 
 interface Post {
   _id: string;
@@ -89,7 +96,7 @@ const Feed = () => {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [croppedImageUrl, setCroppedImageUrl] = useState<string | null>(null);
   const [sentRequests, setSentRequests] = useState<{ [key: string]: boolean }>({});
-
+  const darkMode = useAppSelector((state) => state.theme.darkMode);
   useEffect(() => {
     loadPosts();
     socket.on("connect", () => console.log("socket working"));
@@ -297,7 +304,7 @@ const Feed = () => {
   if (error) return <div>{error}</div>;
 
   return (
-    <div className="feedmain">
+    <div className={`feedmain ${darkMode ? 'dark-mode' : ''}`}>
       <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <h2>Menu</h2>
@@ -312,6 +319,13 @@ const Feed = () => {
             <MessageIcon />
             <span>Messages</span>
           </Link>
+           <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+           <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
+          <div onClick={() => dispatch(toggleDarkMode())} className="sidebar-item">
+             {darkMode ?  <LightMode/> : <ModeNight/>}
+          </div>
+
+           </div>
           <button onClick={handleLogout} className="sidebar-item logout-button">
             <LogoutIcon />
             <span>Logout</span>
@@ -321,7 +335,7 @@ const Feed = () => {
       <div className="feed">
         <div className="feedTop">
           <AutoAwesomeMosaicIcon onClick={toggleSidebar} />
-          <h2>Logo</h2>
+           <h2>Blunt</h2>
           <span>
             <ExploreOutlinedIcon/> 
             <NotificationsNoneIcon />
@@ -335,11 +349,13 @@ const Feed = () => {
                 <div className="img-container">
                   <img src={post.image[0].imageUrl} alt="Post" />
                   <div className="text-container">
-                    <h4>{post.title}</h4>
+                    <h3>{post.title}</h3>
+                    <h3 style={{display: 'flex', alignItems: 'center', gap: '10px' ,color: darkMode ? 'orange' : 'rgb(75 200 68)'}}><Diversity2/> <h3>:</h3> {post.peopleNeeded}</h3>
                   </div>
                 </div>
               )}
             </div>
+
             <div className="post-container-bottom">
               <div className="user-info">
                 <img src={post.user.profilePic || 'default-avatar.png'} alt={post.user.name} />
@@ -348,16 +364,21 @@ const Feed = () => {
                   <h5>{post.location.formatted}</h5>
                 </div>
               </div>
+              {!post.image.length >0  && (
+                <div style={{height: '50px',width: '100px'}} className="text-container">
+                    <h3>{post.title}</h3>
+                    <h3 style={{display: 'flex', alignItems: 'center', gap: '10px' ,color: darkMode ? 'orange' : 'rgb(75 200 68)'}}><Diversity2/> <h3>:</h3> {post.peopleNeeded}</h3>
+                  </div>)}
               <p>{post.description}</p>
               {user && !sentRequests[post._id] && !post.requests.some(request => request.user === user._id) && (
-                <div className="message-request-box">
+                <div className={`message-request-box ${darkMode ? 'dark-mode' : ''}`}>
                   <input
                     type="text"
                     placeholder="Send a message to join this group"
                     value={messageRequests[post._id] || ''}
                     onChange={(e) => handleMessageRequestChange(post._id, e.target.value)}
                   />
-                  <button onClick={() => handleSendMessageRequest(post._id, post.user._id)}>Send Request</button>
+                  <button className="send-request-button" onClick={() => handleSendMessageRequest(post._id, post.user._id)}>Send Request</button>
                 </div>
               )}
             </div>

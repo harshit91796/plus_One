@@ -1,4 +1,4 @@
-/* Chat Container */
+/* 
 .chat-container {
     display: flex;
     flex-direction: column;
@@ -6,7 +6,7 @@
     background-color: #f4f4f4;
   }
   
-  /* Header Section */
+
   .chat-header {
     background-color: #2b78e4;
     color: white;
@@ -54,7 +54,7 @@
     cursor: pointer;
   }
   
-  /* Chat Body */
+  
   .chat-body {
     flex-grow: 1;
     padding: 20px;
@@ -107,13 +107,13 @@
     font-size: 12px;
   }
   
-  /* Image Message */
+ 
   .image-message .message-image {
     width: 100%;
     border-radius: 15px;
   }
   
-  /* Chat Input */
+  
   .chat-input {
     display: flex;
     align-items: center;
@@ -142,7 +142,7 @@
     cursor: pointer;
   }
   
-  /* Responsive Design */
+  
   @media (max-width: 768px) {
     .message {
       max-width: 80%;
@@ -154,4 +154,4 @@
       max-width: 90%;
     }
   }
-  
+   */
