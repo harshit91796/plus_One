@@ -36,7 +36,8 @@
     "socket.io-client": "^4.7.5",
     "use-places-autocomplete": "^4.0.1",
     "uuid": "^10.0.0",
-    "wavesurfer.js": "^7.8.6"
+    "wavesurfer.js": "^7.8.6",
+    "rollup": "^2.79.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.8.0",
