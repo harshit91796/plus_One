@@ -123,10 +123,10 @@ export const router = createBrowserRouter([
       <ChatPage/>
     </ProtectedRoute>
   },
-  {
-    path: '*',
-    element: <ErrDefault />,
-  },
+  // {
+  //   path: '*',
+  //   element: <ErrDefault />,
+  // },
   {
     path: '/oauth-callback',
     element: <OathCallback />,

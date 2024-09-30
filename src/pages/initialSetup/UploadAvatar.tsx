@@ -31,11 +31,11 @@ const UploadAvatar = () => {
     }
   };
 
-  const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
+  const onCropComplete = useCallback((croppedArea: any, croppedAreaPixels: any) => {
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
 
-  const getCroppedImg = async (imageSrc, pixelCrop) => {
+  const getCroppedImg = async ( imageSrc: string, pixelCrop: any) => {
     const image = await createImage(imageSrc);
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -55,8 +55,8 @@ const UploadAvatar = () => {
       pixelCrop.height
     );
 
-    return new Promise((resolve, reject) => {
-      canvas.toBlob((blob) => {
+    return new Promise((resolve: any, reject: any) => {
+      canvas.toBlob((blob: any) => {
         if (!blob) {
           console.error('Canvas is empty');
           return;
@@ -71,9 +71,9 @@ const UploadAvatar = () => {
     if (croppedAreaPixels && selectedImage) {
       try {
         const croppedImageUrl = await getCroppedImg(URL.createObjectURL(selectedImage), croppedAreaPixels);
-        setCroppedImageUrl(croppedImageUrl);
+        setCroppedImageUrl(croppedImageUrl as string);
 
-        const response = await fetch(croppedImageUrl);
+        const response = await fetch(croppedImageUrl as string);
         const blob = await response.blob();
         const uniqueFilename = `avatar-${uuidv4()}.jpg`;
         const file = new File([blob], uniqueFilename, { type: 'image/jpeg' });
@@ -91,8 +91,8 @@ const UploadAvatar = () => {
         console.log('Image uploaded to Supabase:', data);
         const imageUrl = `${supabaseUrl}/storage/v1/object/public/ghosts/${data.path}`;
         console.log('Image uploaded to Supabase:', imageUrl);
-        dispatch(setUser({ ...user, profilePic: imageUrl }));
-        const updatedUser = await updateUser({ profilePic: imageUrl });
+        dispatch(setUser({ ...user,  profilePic: imageUrl as string }));
+        const updatedUser = await updateUser({ profilePic: imageUrl as string });
         console.log('Updated user:', updatedUser);
         navigate('/');
 
