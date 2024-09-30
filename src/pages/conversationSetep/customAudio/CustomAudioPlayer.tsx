@@ -1,18 +1,19 @@
-import React, { useState, useRef } from 'react';
-import { FaPlay, FaPause } from 'react-icons/fa';
+import { useState, useRef } from 'react';
 import './CustomAudioPlayer.css'; // Link to your custom CSS file
 import AudioWaveform from '../waveform/AudioWaveform';
 
-const CustomAudioPlayer = ({ audioSrc }) => {
+const CustomAudioPlayer = ({ audioSrc }: { audioSrc: string }) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
 
   const togglePlay = () => {
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current?.pause();
+      } else {
+        audioRef.current?.play();
+      }
     }
     setIsPlaying(!isPlaying);
   };
