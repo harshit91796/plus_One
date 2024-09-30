@@ -19,6 +19,8 @@ interface Message {
   createdAt: string;
 }
 
+
+
 type MessageAction = 
   | { type: 'SET_MESSAGES'; payload: Message[] }
   | { type: 'ADD_MESSAGE'; payload: Message }
@@ -96,14 +98,14 @@ const DirectMessagePage: React.FC = () => {
     }
   }, [currentUser, chatId, loadMessages]);
 
-  const handleSendMessage = useCallback(async (chatId: string, content: string, fileUrl: string, fileType: string) => {
+  const handleSendMessage = useCallback(async (chatId: string, content: string, fileUrl?: string, fileType?: string) => {
     console.log('handleSendMessage function called with:', 'fileType:', fileType ,"fileUrl:", fileUrl , "content:", content , "chatId:", chatId);
     if (!chatId) return;
     const tempId = Date.now().toString();
     const tempMessage: Message = {
       _id: tempId,
       content,
-      contentType: fileType || 'text',
+      contentType: (fileType as "audio" | "video" | "text" | "image") || 'text',
       mediaUrl: fileUrl,
       sender: currentUser,
       createdAt: new Date().toISOString(),
@@ -111,7 +113,7 @@ const DirectMessagePage: React.FC = () => {
     lastSentMessageRef.current = tempId;
     dispatch({ type: 'ADD_MESSAGE', payload: tempMessage });
     try {
-      const response = await sendMessage(chatId, content, fileUrl, fileType);
+      const response = await sendMessage(chatId, content, fileUrl ?? '', fileType ?? '');
       socketSendMessage({
         ...response,
         chat: { _id: chatId, users: currentChat.users }
@@ -125,7 +127,9 @@ const DirectMessagePage: React.FC = () => {
     <ChatWindow
       chatId={chatId!}
       messages={messages}
-      onSendMessage={handleSendMessage}
+      onSendMessage={(chatId: string, content: string, fileUrl?: string, fileType?: string) => 
+        handleSendMessage(chatId, content, fileUrl || '', fileType || '')
+      }
       currentChat={currentChat}
       currentUser={currentUser}
     />

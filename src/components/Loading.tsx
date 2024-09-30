@@ -1,14 +1,13 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
+// import { useSelector } from 'react-redux'
 
-const Loading = () => {
+// const Loading = () => {
 
-   const visible= useSelector(state=>state.loading.value)
-  return (
-    <div className="load" style={{display:visible?'initial':'none'}}>
-      <img  src="https://media.tenor.com/RVvnVPK-6dcAAAAM/reload-cat.gif" alt="" />
-    </div>
-  )
-}
+//    const visible= useSelector(state=>state.loading.value)
+//   return (
+//     <div className="load" style={{display:visible?'initial':'none'}}>
+//       <img  src="https://media.tenor.com/RVvnVPK-6dcAAAAM/reload-cat.gif" alt="" />
+//     </div>
+//   )
+// }
 
-export default Loading
+// export default Loading

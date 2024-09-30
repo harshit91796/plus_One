@@ -22,7 +22,7 @@ const App: React.FC = () => {
     // Simulate loading time
     setTimeout(() => {
       setIsLoading(false);
-    }, 2000); // Adjust this time as needed
+    }, 6000); // Adjust this time as needed
   }, []);
 
   if (isLoading) {

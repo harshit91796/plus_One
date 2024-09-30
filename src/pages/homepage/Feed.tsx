@@ -7,22 +7,17 @@ import { fetchPlaceSuggestions } from '../../utils/opencage';
 import Cropper from 'react-easy-crop';
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid'; 
-import { WbSunnyIcon ,ModeNightIcon, ModeNight, Surfing, LightMode, Diversity2 } from '@mui/icons-material';
-import blunt2 from '../../../../../../images/blunt2-removebg.png';
-import blunt from '../../../../../../images/blunt.jpg';
+import {  ModeNight,  LightMode, Diversity2 } from '@mui/icons-material';
+
 
 // import '../../assets/styles/react-easy-crop.css'; // Import the CSS file
 import {
   HomeIcon,
   SearchIcon,
-  AddBoxIcon,
-  ChatIcon,
-  AccountBoxIcon,
   NotificationsNoneIcon,
   AutoAwesomeMosaicIcon,
   AccountCircleRoundedIcon,
   AddCircleRoundedIcon,
-  ExploreRoundedIcon,
   ExploreOutlinedIcon,
   SettingsIcon,
   LogoutIcon,
@@ -36,7 +31,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useAppSelector } from '../../redux/hooks/hooks';
 import { toggleDarkMode } from '../../redux/theme/themeSlice';
-import DarkModeToggle from "../../components/DarkModeToggle";
+
 
 interface Post {
   _id: string;
@@ -54,14 +49,9 @@ interface Post {
   };
   image: string[];
   createdAt: string;
+  requests: Array<{ user: string }>;
 }
 
-const dummyImages = [
-  "https://images.unsplash.com/photo-1724086575243-6796fc662673?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwzfHx8ZW58MHx8fHx8",
-  "https://plus.unsplash.com/premium_photo-1723983555279-8de1f6e633e3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxMnx8fGVufDB8fHx8fA%3D%3D",
-  "https://plus.unsplash.com/premium_photo-1706807135398-31770beffb74?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxN3x8fGVufDB8fHx8fA%3D%3D",
-  "https://images.unsplash.com/photo-1724086576041-34e434df9303?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw4fHx8ZW58MHx8fHx8",
-];
 
 // Initialize Supabase client
 
@@ -222,11 +212,14 @@ const Feed = () => {
     }
   };
 
-  const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
+  const onCropComplete = useCallback((
+    _: unknown,
+    croppedAreaPixels: any
+  ) => {
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
 
-  const getCroppedImg = async (imageSrc, pixelCrop) => {
+  const getCroppedImg = async (imageSrc: string, pixelCrop: any) => {
     const image = await createImage(imageSrc);
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -234,19 +227,21 @@ const Feed = () => {
     canvas.width = pixelCrop.width;
     canvas.height = pixelCrop.height;
 
-    ctx.drawImage(
-      image,
-      pixelCrop.x,
-      pixelCrop.y,
-      pixelCrop.width,
-      pixelCrop.height,
-      0,
-      0,
-      pixelCrop.width,
-      pixelCrop.height
-    );
+    if (ctx) {
+      ctx.drawImage(
+        image,
+        pixelCrop.x,
+        pixelCrop.y,
+        pixelCrop.width,
+        pixelCrop.height,
+        0,
+        0,
+        pixelCrop.width,
+        pixelCrop.height
+      );
+    }
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       canvas.toBlob((blob) => {
         if (!blob) {
           console.error('Canvas is empty');
@@ -254,7 +249,7 @@ const Feed = () => {
         }
         const fileUrl = URL.createObjectURL(blob);
         resolve(fileUrl);
-      }, 'image/jpeg');
+      });
     });
   };
 
@@ -263,9 +258,9 @@ const Feed = () => {
     console.log('handleImageUploadToSupabase triggered');
     if (croppedAreaPixels && selectedImage) {
       const croppedImageUrl = await getCroppedImg(URL.createObjectURL(selectedImage), croppedAreaPixels);
-      setCroppedImageUrl(croppedImageUrl);
+      setCroppedImageUrl(croppedImageUrl as string);
 
-      const response = await fetch(croppedImageUrl);
+      const response = await fetch(croppedImageUrl as string);
       const blob = await response.blob();
       const uniqueFilename = `cropped-image-${uuidv4()}.jpg`; // Generate a unique filename
       const file = new File([blob], uniqueFilename, { type: 'image/jpeg' });
@@ -364,13 +359,13 @@ const Feed = () => {
                   <h5>{post.location.formatted}</h5>
                 </div>
               </div>
-              {!post.image.length >0  && (
+              {post.image.length === 0 && (
                 <div style={{height: '50px',width: '100px'}} className="text-container">
                     <h3>{post.title}</h3>
                     <h3 style={{display: 'flex', alignItems: 'center', gap: '10px' ,color: darkMode ? 'orange' : 'rgb(75 200 68)'}}><Diversity2/> <h3>:</h3> {post.peopleNeeded}</h3>
                   </div>)}
               <p>{post.description}</p>
-              {user && !sentRequests[post._id] && !post.requests.some(request => request.user === user._id) && (
+              {user && !sentRequests[post._id] && !post.requests?.some((request: any) => request.user === user._id) && (
                 <div className={`message-request-box ${darkMode ? 'dark-mode' : ''}`}>
                   <input
                     type="text"

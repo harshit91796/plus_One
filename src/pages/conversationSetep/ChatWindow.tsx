@@ -4,13 +4,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { AudioRecorder } from 'react-audio-voice-recorder';
 import CustomAudioPlayer from './customAudio/CustomAudioPlayer';
 
-const addAudioElement = (blob) => {
-  const url = URL.createObjectURL(blob);
-  const audio = document.createElement("audio");
-  audio.src = url;
-  audio.controls = true;
-  document.body.appendChild(audio);
-};
+// const addAudioElement = (blob) => {
+//   const url = URL.createObjectURL(blob);
+//   const audio = document.createElement("audio");
+//   audio.src = url;
+//   audio.controls = true;
+//   document.body.appendChild(audio);
+// };
 
 // Initialize Supabase client
 const supabaseUrl = 'https://ziruawrcztsttxzvlsuz.supabase.co';
@@ -33,7 +33,6 @@ interface ChatWindowProps {
   chatId: string;
   messages: Message[];
   onSendMessage: (chatId: string, content: string, fileUrl?: string, fileType?: string) => void;
-  currentChat: any;
   currentUser: { _id: string; name: string; avatar?: string };
 }
 
@@ -47,7 +46,7 @@ const MessageItem = memo(({ message, isUser }: { message: Message; isUser: boole
   </div>
 ));
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, messages, onSendMessage, currentChat, currentUser }) => {
+const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, messages, onSendMessage, currentUser }) => { 
   const [newMessage, setNewMessage] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);

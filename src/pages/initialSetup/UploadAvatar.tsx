@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import Cropper from 'react-easy-crop';
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
@@ -6,10 +6,7 @@ import {Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import { setUser } from '../../redux/user/userSlice';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import { updateUser } from '../../Api';
-
 const supabaseUrl = 'https://ziruawrcztsttxzvlsuz.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppcnVhd3JjenRzdHR4enZsc3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjY5MDUyNjcsImV4cCI6MjA0MjQ4MTI2N30.YIYgAo7Z8Kb2PuLZtYYQaymdjAySWqdnzraa-0Loj20';
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -31,7 +28,7 @@ const UploadAvatar = () => {
     }
   };
 
-  const onCropComplete = useCallback((croppedArea: any, croppedAreaPixels: any) => {
+  const onCropComplete = useCallback((_: unknown, croppedAreaPixels: any) => {
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
 
@@ -43,19 +40,23 @@ const UploadAvatar = () => {
     canvas.width = pixelCrop.width;
     canvas.height = pixelCrop.height;
 
-    ctx.drawImage(
-      image,
-      pixelCrop.x,
-      pixelCrop.y,
-      pixelCrop.width,
-      pixelCrop.height,
-      0,
-      0,
-      pixelCrop.width,
-      pixelCrop.height
-    );
+    if (ctx) {
+      ctx.drawImage(
+        image,
+        pixelCrop.x,
+        pixelCrop.y,
+        pixelCrop.width,
+        pixelCrop.height,
+        0,
+        0,
+        pixelCrop.width,
+        pixelCrop.height
+      );
+    } else {
+      console.error('Canvas context is null');
+    }
 
-    return new Promise((resolve: any, reject: any) => {
+    return new Promise((resolve: any) => {
       canvas.toBlob((blob: any) => {
         if (!blob) {
           console.error('Canvas is empty');
@@ -91,9 +92,9 @@ const UploadAvatar = () => {
         console.log('Image uploaded to Supabase:', data);
         const imageUrl = `${supabaseUrl}/storage/v1/object/public/ghosts/${data.path}`;
         console.log('Image uploaded to Supabase:', imageUrl);
-        dispatch(setUser({ ...user,  profilePic: imageUrl as string }));
-        const updatedUser = await updateUser({ profilePic: imageUrl as string });
-        console.log('Updated user:', updatedUser);
+        dispatch(setUser({ ...user, profilePic: imageUrl }));
+        await updateUser({ profilePic: imageUrl});
+        
         navigate('/');
 
         setCroppedImageUrl(null);

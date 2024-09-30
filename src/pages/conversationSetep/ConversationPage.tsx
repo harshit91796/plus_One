@@ -1,45 +1,61 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ConversationList from './ConversationList';
-import { getChats, getMessages, accessChat, searchUsers, sendMessage as  logout } from '../../Api';
+import { getChats, getMessages, searchUsers } from '../../Api';
 import { sendMessageRequest } from '../../Api';
-import { useAppSelector, useAppDispatch } from '../../redux/hooks/hooks';
-import { setUser, clearUser } from '../../redux/user/userSlice';
+import { useAppSelector } from '../../redux/hooks/hooks';
 import './Conversation.css';
-import { initSocket, joinChatRoom, leaveRoom, socketSendMessage as socketSendMessage, onMessageReceived, disconnectSocket } from '../../socket';
+import { initSocket, joinChatRoom, leaveRoom, socketSendMessage as  onMessageReceived, disconnectSocket } from '../../socket';
 // import { Modal } from '@mui/material';
 import Modal from 'react-modal';
-import { IoArrowBackCircleOutline } from 'react-icons/io5';
+import { SearchResult } from '../path/to/SearchResult';
+
 import { ArrowBackIos } from '@mui/icons-material';
+
+interface Chat {
+  _id: string;
+  users: Array<{ _id: string }>;
+  isTemporary: boolean;
+  isGroupChat: boolean;
+  // Add other properties as needed
+};
+
+
+
+// type Message = {
+//   _id: string;
+//   content: string;
+//   sender: string;
+//   timestamp: Date;
+// };
 
 const ConversationPage: React.FC = () => {
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
-  const user = useAppSelector((state) => state.user.user);
+  const user = useAppSelector( (state) => state.user.user);
   const [chats, setChats] = useState<Chat[]>([]);
+  // const [messages, setMessages] = useState<Message[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState<'general' | 'groups' | 'requests'>('general');
-  const [filteredChats, setFilteredChats] = useState([]);
+  const [filteredChats, setFilteredChats] = useState<Chat[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const darkMode = useAppSelector((state) => state.theme.darkMode);
 
   Modal.setAppElement('#root');
 
-  const customStyles = {
-    content: {
-      top: '50%',
-      left: '50%',
-      right: 'auto',
-      bottom: 'auto',
-      marginRight: '-50%',
-      transform: 'translate(-50%, -50%)',
-    },
-  };
+  // const customStyles = {
+  //   content: {
+  //     top: '50%',
+  //     left: '50%',
+  //     right: 'auto',
+  //     bottom: 'auto',
+  //     marginRight: '-50%',
+  //     transform: 'translate(-50%, -50%)',
+  //   },
+  // };
 
   useEffect(() => {
     if (selectedTab === 'general') {
@@ -73,11 +89,12 @@ const ConversationPage: React.FC = () => {
   useEffect(() => {
     if (user) {
       console.log('ConversationPage: Initializing socket for user:', user._id);
-      const socket = initSocket(user._id);
+      // Remove the socket initialization if it's not used
+      initSocket(user._id);
       
-      onMessageReceived((newMessage) => {
+      onMessageReceived((newMessage: any) => {
         console.log('New message received:', newMessage);
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
+        // setMessages((prevMessages) => [...prevMessages, newMessage]);
         setChats((prevChats) =>
           prevChats.map((chat) =>
             chat._id === newMessage.chat._id ? { ...chat, latestMessage: newMessage } : chat
@@ -111,36 +128,14 @@ const ConversationPage: React.FC = () => {
     try {
       const fetchedMessages = await getMessages(chatId);
       console.log('Fetched messages:', fetchedMessages);
-      setMessages(fetchedMessages);
+      // setMessages(fetchedMessages);
     } catch (error) {
       console.error('Error loading messages:', error);
       setError('Failed to load messages. Please try again.');
     }
   };
 
-  const handleSendMessage = async (content: string) => {
-    if (selectedChatId) {
-      setError(null);
-      try {
-        console.log('Sending message:', content);
-        const newMessage = await apiSendMessage(selectedChatId, content);
-        console.log('New message sent:', newMessage);
-        socketSendMessage({
-          ...newMessage,
-          chat: { _id: selectedChatId, users: chats.find(c => c._id === selectedChatId)?.users }
-        });
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
-        setChats((prevChats) =>
-          prevChats.map((chat) =>
-            chat._id === selectedChatId ? { ...chat, latestMessage: newMessage } : chat
-          )
-        );
-      } catch (error) {
-        console.error('Error sending message:', error);
-        setError('Failed to send message. Please try again.');
-      }
-    }
-  };
+  
 
   const handleSelectChat = (chatId: string) => {
     setSelectedChatId(chatId);
@@ -176,12 +171,12 @@ const ConversationPage: React.FC = () => {
     // setError(null);
     try {
       // const chat = await accessChat(userId);
-      const existingChat = chats.find(c => c.users.some(user => user._id === userId));
+      const existingChat = chats.find(c => c.users?.some((user: { _id: string }) => user._id === userId));
       if (existingChat) {
-        setSelectedChatId(existingChat._id);
+        setSelectedChatId( existingChat._id);
         navigate(`/conversation/direct/message/${existingChat._id}`);
       } else {
-        const chat = await sendMessageRequest(userId);
+        const chat = await sendMessageRequest(userId,'','');
         console.log("chatRequest",chat);
         setSelectedChatId(chat._id);
         setIsModalOpen(false);
@@ -196,16 +191,7 @@ const ConversationPage: React.FC = () => {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      dispatch(clearUser());
-      navigate('/login');
-    } catch (error) {
-      console.error('Error during logout:', error);
-      setError('Failed to logout. Please try again.');
-    }
-  };
+  
 
   if (loading) {
     return <div>Loading conversations...</div>;
@@ -283,7 +269,7 @@ const ConversationPage: React.FC = () => {
           placeholder="Search for users..."
         />
         <ul className="search-results">
-          {searchResults.map((result) => (
+          {searchResults.map((result: SearchResult) => (
             <li key={result._id} onClick={() => handleSelectSearchResult(result._id)}>
                 <div className='search-result-container'>
                 <img src={result.profilePic} style={{width: '50px', height: '50px'}} alt={result.username} />

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Setup from "../../components/Setup";
 import { getPrefrence, updatePrefrence } from "../../services/setUp";
 import { useNavigate } from "react-router-dom";
@@ -10,10 +10,10 @@ const Launguage = () => {
   
   const navigate=useNavigate()
     
-    const handleSubmit=async (data)=>{
+    const handleSubmit=async (data:any)=>{
   console.log(data)
   
-  const promises = data.map(x => updatePrefrence({ field: x.keyWord, value: x.selectedItems }));
+  const promises = data.map((x:any) => updatePrefrence({ field: x.keyWord, value: x.selectedItems }));
   await Promise.all(promises);
   navigate('/religion')
     }
@@ -25,7 +25,7 @@ const Launguage = () => {
       console.log(res)
       setTitle(res.data.data.allOptions[0].title)
       setSubcategory(res.data.data.allOptions[0].subcategory) 
-      const data=res.data.data.allOptions.map(x=>{
+      const data=res.data.data.allOptions.map((x:any)=>{
         return {
           subTitle: x.subtitle,
           items: x.options,

@@ -5,6 +5,7 @@ interface Chat {
   _id: string;
   chatName: string;
   isGroupChat: boolean;
+  groupProfilePic?: string; // Add this line
   users: Array<{ _id: string; name: string }>;
   latestMessage?: {
     content: string;
@@ -12,11 +13,18 @@ interface Chat {
   };
 }
 
+interface User {
+  _id: string;
+  name: string;
+  profilePic?: string;
+}
+
+
 interface ConversationListProps {
   chats: Chat[];
   onSelectChat: (chatId: string) => void;
   selectedChatId: string | null;
-  user: { _id: string; name: string };
+  user: User;
 }
 
 const ConversationList: React.FC<ConversationListProps> = ({ chats, selectedChatId, user }) => {
@@ -32,13 +40,24 @@ const ConversationList: React.FC<ConversationListProps> = ({ chats, selectedChat
           to={`/conversation/direct/message/${chat._id}`}
           className={`chat-item ${chat._id === selectedChatId ? 'selected' : ''}`}
         >
-          <img src={chat?.isGroupChat ? chat.isGroupChat.profilePic ? chat.isGroupChat.profilePic : chat.users.find(u => u._id == user._id)?.profilePic : chat.users.find(u => u._id !== user._id)?.profilePic} alt={chat.chatName} className="chat-avatar" />
+          <img 
+            src={chat.isGroupChat 
+              ? (chat.groupProfilePic || chat.users.find(u => u._id === user._id)?.profilePic ) 
+              : chat.users.find(u => u._id !== user._id)?.profilePic 
+            } 
+            alt={chat.chatName} 
+            className="chat-avatar" 
+          />
           <div className="chat-info">
             <p className="chat-name">{chat.isGroupChat ? chat.chatName : chat.users.find(u => u._id !== user._id)?.name}</p>
             <p className="chat-message">{chat.latestMessage ? chat.latestMessage.content : 'No messages yet'}</p>
           </div>
           <div className="chat-meta">
-            <p className="chat-time">{chat.latestMessage ? new Date(chat.latestMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</p>
+            <p className="chat-time">
+              {chat.latestMessage && 'createdAt' in chat.latestMessage
+                ? new Date(chat.latestMessage.createdAt as string).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                : ''}
+            </p>
             {/* Add unread count if available */}
           </div>
         </Link>

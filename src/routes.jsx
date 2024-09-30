@@ -16,7 +16,6 @@ import Religion from "./pages/profileSetup/Religion";
 import TrevelPrefrence from "./pages/profileSetup/TrevelPrefrence";
 import SportsPrefrence from "./pages/profileSetup/SportsPrefrence";
 import Feed from "./pages/homepage/Feed";
-import ErrDefault from "./components/ErrDefault"
 import Profile from "./pages/user/profile";
 import Login from "./pages/loginSetup/Login";
 import OathCallback from "./pages/loginSetup/OAuthCallback";
