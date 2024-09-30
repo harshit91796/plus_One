@@ -1,5 +1,5 @@
 import React from 'react';
-import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
+import {  createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 import NickName from "./pages/initialSetup/NickName";
