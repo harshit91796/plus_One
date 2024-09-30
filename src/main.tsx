@@ -8,6 +8,7 @@ import './assets/styles/feedMain.scss';
 import './assets/styles/sigining.scss';
 import './assets/styles/chats.scss';
 import './assets/styles/userprofile.scss';
+import './index.css';
 
 import { RouterProvider } from "react-router-dom";
 import { router } from './routes';
