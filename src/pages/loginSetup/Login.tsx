@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { login, sendOtp, verifyOtp } from '../../Api';
 import { useAppDispatch } from '../../redux/hooks/hooks';
 import { setUser } from '../../redux/user/userSlice';
@@ -101,6 +101,7 @@ const Login: React.FC = () => {
           <button onClick={() => handleOAuthLogin('google')} className="google-btn">Login with Google</button>
           <button onClick={() => handleOAuthLogin('facebook')} className="facebook-btn">Login with Facebook</button>
         </div>
+        <p>Don't have an account? <Link to="/register">Register</Link></p>
       </div>
     </div>
   );

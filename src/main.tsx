@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 import './Index.css';
@@ -10,24 +9,35 @@ import './assets/styles/sigining.scss';
 import './assets/styles/chats.scss';
 import './assets/styles/userprofile.scss';
 
-import { RouterProvider,
-} from "react-router-dom";
-import {router} from './routes';
+import { RouterProvider } from "react-router-dom";
+import { router } from './routes';
 import { store } from './redux/store'
 import { Provider } from 'react-redux'
-import Layout from "./components/Layout";
-import DarkModeToggle from "./components/DarkModeToggle";
-// import Loading from "./components/Loading";
+import LoadingScreen from './components/LoadingStartScreen';
 
+const App: React.FC = () => {
+  const [isLoading, setIsLoading] = React.useState(true);
 
+  React.useEffect(() => {
+    // Simulate loading time
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 2000); // Adjust this time as needed
+  }, []);
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  return (
     <Provider store={store}>
-    
-        <RouterProvider router={router} />
-      
-    </Provider>,
-   
+      <RouterProvider router={router} />
+    </Provider>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+  <React.StrictMode>
+    <App />
   </React.StrictMode>
 );

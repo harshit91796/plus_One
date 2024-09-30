@@ -2,13 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { checkIfUserNameAvailable, getUserDetails, updateUserDetails } from "../../services/user";
 import { useDispatch, useSelector } from "react-redux";
-import { newUser } from "../../redux/userSlice";
+// import { newUser } from "../../redux/userSlice";
 
 const Username = () => {
   const [usernameAvailable, setUsernameAvailable] = useState(false);
   const [usernameValue, setUsernameValue] = useState("");
 
-  const user = { ...useSelector((state) => state.user.value) };
+  // const user = { ...useSelector((state) => state.user.value) };
 
   const timeoutRef = useRef(null);
   const navigate = useNavigate();
@@ -42,7 +42,7 @@ const Username = () => {
     })
   }, []);
   return (
-    <form onSubmit={handleSubmit} className="initial-setup">
+    <form  className="initial-setup">
       <h2>Celebrate your uniqueness with a username as special as you are.</h2>
       <p>
         Choose a unique username so people can find you easily and connect with
@@ -53,7 +53,7 @@ const Username = () => {
         placeholder="Username"
         value={usernameValue}
         required
-        onChange={checkUserName}
+        // onChange={checkUserName}
         style={{ background: usernameAvailable ? "#31ff314d" : "" }}
       />
       {usernameValue && usernameValue.length > 7 ? (

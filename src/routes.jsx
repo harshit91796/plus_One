@@ -5,7 +5,6 @@ import { useSelector } from 'react-redux';
 import NickName from "./pages/initialSetup/NickName";
 import Username from "./pages/initialSetup/Username";
 import UploadAvatar from "./pages/initialSetup/UploadAvatar";
-import ImageUpload from "./pages/initialSetup/ImageUpload";
 import Gender from "./pages/initialSetup/Gender";
 import AskSetup from "./pages/initialSetup/AskSetup";
 import Birthday from "./pages/initialSetup/Birthday";
@@ -18,10 +17,6 @@ import Religion from "./pages/profileSetup/Religion";
 import TrevelPrefrence from "./pages/profileSetup/TrevelPrefrence";
 import SportsPrefrence from "./pages/profileSetup/SportsPrefrence";
 import Feed from "./pages/homepage/Feed";
-import Phone from "./pages/signing/Phone";
-import Otp from "./pages/signing/Otp";
-import Chat from "./pages/chat/Chat"
-import AllChats from "./pages/chat/AllChats"
 import ErrDefault from "./components/ErrDefault"
 import Profile from "./pages/user/profile";
 import Login from "./pages/loginSetup/Login";
@@ -55,14 +50,6 @@ export const router = createBrowserRouter([
     element: <Login />,
   },
   {
-    path: '/phone',
-    element: <Phone />,
-  },
-  {
-    path: '/otp',
-    element: <Otp />,
-  },
-  {
     path: '/',
     element: <ProtectedRoute requireAuth={false} />,
     children: [
@@ -94,37 +81,14 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      {
-        path: 'chat',
-        element: (
-          <ProtectedRoute requireAuth={true}>
-            <Chat />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'chats',
-        element: (
-          <ProtectedRoute requireAuth={true}>
-            <AllChats />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'upload',
-        element: (
-          <ProtectedRoute requireAuth={true}>
-            <ImageUpload />
-          </ProtectedRoute>
-        ),
-      },
+      
+      
       // Initial setup routes
       {
         path: 'setup',
         element: <ProtectedRoute requireAuth={true} />,
         children: [
           { path: 'nickname', element: <NickName /> },
-          { path: 'username', element: <Username /> },
           { path: 'avatar', element: <UploadAvatar /> },
           { path: 'gender', element: <Gender /> },
           { path: 'ask', element: <AskSetup /> },
