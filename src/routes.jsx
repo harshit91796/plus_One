@@ -16,7 +16,7 @@ import UploadAvatar from "./pages/initialSetup/UploadAvatar";
 // import TrevelPrefrence from "./pages/profileSetup/TrevelPrefrence";
 // import SportsPrefrence from "./pages/profileSetup/SportsPrefrence";
 import Feed from "./pages/homepage/Feed";
-import Profile from "./pages/user/profile";
+// import Profile from "./pages/user/profile";
 import Login from "./pages/loginSetup/Login";
 import OathCallback from "./pages/loginSetup/OAuthCallback";
 import ConversationPage from "./pages/conversationSetep/ConversationPage";
@@ -55,14 +55,14 @@ export const router = createBrowserRouter([
         path: '',
         element: <Feed />,
       },
-      {
-        path: 'profile',
-        element: (
-          <ProtectedRoute requireAuth={true}>
-            <Profile />
-          </ProtectedRoute>
-        ),
-      },
+      // {
+      //   path: 'profile',
+      //   element: (
+      //     <ProtectedRoute requireAuth={true}>
+      //       <Profile />
+      //     </ProtectedRoute>
+      //   ),
+      // },
       {
         path: 'conversations',
         element: (
