@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
-import './Index.css';
+// import './Index.css';
 import './assets/styles/initialSetup.scss';
 import './assets/styles/setTupPage.scss';
 import './assets/styles/cropper.scss';
@@ -8,7 +8,7 @@ import './assets/styles/feedMain.scss';
 import './assets/styles/sigining.scss';
 import './assets/styles/chats.scss';
 import './assets/styles/userprofile.scss';
-// import '../src/index.css';
+import '../src/index.css';
 
 import { RouterProvider } from "react-router-dom";
 import { router } from './routes';
