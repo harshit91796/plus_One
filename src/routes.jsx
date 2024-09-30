@@ -3,7 +3,6 @@ import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 import NickName from "./pages/initialSetup/NickName";
-import Username from "./pages/initialSetup/Username";
 import UploadAvatar from "./pages/initialSetup/UploadAvatar";
 import Gender from "./pages/initialSetup/Gender";
 import AskSetup from "./pages/initialSetup/AskSetup";
