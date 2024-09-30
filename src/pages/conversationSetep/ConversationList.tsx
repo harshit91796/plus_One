@@ -1,40 +1,36 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-interface Chat {
-  _id: string;
-  chatName: string;
-  isGroupChat: boolean;
-  groupProfilePic?: string; // Add this line
-  users: Array<{ _id: string; name: string }>;
-  latestMessage?: {
-    content: string;
-    sender: { name: string };
-  };
-}
+// interface Chat {
+//   _id: string;
+//   chatName: string;
+//   isGroupChat: boolean;
+//   groupProfilePic?: string; // Add this line
+//   users: Array<{ _id: string; name: string , profilePic?: string }>;
+//   latestMessage?: {
+//     content: string;
+//     sender: { name: string };
+//   };
+// }
 
-interface User {
-  _id: string;
-  name: string;
-  profilePic?: string;
-}
+
 
 
 interface ConversationListProps {
-  chats: Chat[];
+  chats: any;
   onSelectChat: (chatId: string) => void;
   selectedChatId: string | null;
-  user: User;
+  user: any
 }
 
-const ConversationList: React.FC<ConversationListProps> = ({ chats, selectedChatId, user }) => {
+const ConversationList: React.FC<ConversationListProps> = ({ chats , selectedChatId, user }) => {
   if (!chats || chats.length === 0) {
     return <div className="no-conversations">No conversations yet.</div>;
   }
 
   return (
     <>
-      {chats.map((chat) => (
+      {chats.map((chat: any) => (
         <Link
           key={chat._id}
           to={`/conversation/direct/message/${chat._id}`}
@@ -42,14 +38,14 @@ const ConversationList: React.FC<ConversationListProps> = ({ chats, selectedChat
         >
           <img 
             src={chat.isGroupChat 
-              ? (chat.groupProfilePic || chat.users.find(u => u._id === user._id)?.profilePic ) 
-              : chat.users.find(u => u._id !== user._id)?.profilePic 
+              ? (chat.groupProfilePic || chat.users.find((u: any) => u._id === user._id)?.profilePic ) 
+              : chat.users.find((u: any) => u._id !== user._id)?.profilePic 
             } 
             alt={chat.chatName} 
             className="chat-avatar" 
           />
           <div className="chat-info">
-            <p className="chat-name">{chat.isGroupChat ? chat.chatName : chat.users.find(u => u._id !== user._id)?.name}</p>
+            <p className="chat-name">{chat.isGroupChat ? chat.chatName : chat.users.find((u: any)  => u._id !== user._id)?.name}</p>
             <p className="chat-message">{chat.latestMessage ? chat.latestMessage.content : 'No messages yet'}</p>
           </div>
           <div className="chat-meta">

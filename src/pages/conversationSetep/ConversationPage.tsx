@@ -8,7 +8,7 @@ import './Conversation.css';
 import { initSocket, joinChatRoom, leaveRoom, socketSendMessage as  onMessageReceived, disconnectSocket } from '../../socket';
 // import { Modal } from '@mui/material';
 import Modal from 'react-modal';
-import { SearchResult } from '../path/to/SearchResult';
+// import { SearchResult } from '../path/to/SearchResult';
 
 import { ArrowBackIos } from '@mui/icons-material';
 
@@ -269,7 +269,7 @@ const ConversationPage: React.FC = () => {
           placeholder="Search for users..."
         />
         <ul className="search-results">
-          {searchResults.map((result: SearchResult) => (
+          {searchResults.map((result: any) => (
             <li key={result._id} onClick={() => handleSelectSearchResult(result._id)}>
                 <div className='search-result-container'>
                 <img src={result.profilePic} style={{width: '50px', height: '50px'}} alt={result.username} />

@@ -32,16 +32,17 @@ interface Message {
 interface ChatWindowProps {
   chatId: string;
   messages: Message[];
-  onSendMessage: (chatId: string, content: string, fileUrl?: string, fileType?: string) => void;
-  currentUser: { _id: string; name: string; avatar?: string };
+  onSendMessage: (chatId: string, content: string, fileUrl?: string, fileType?: string) => Promise<void>;
+  currentChat: any; // Replace 'any' with the correct type
+  currentUser: any; // Replace 'any' with the correct type
 }
 
 const MessageItem = memo(({ message, isUser }: { message: Message; isUser: boolean }) => (
   <div className={`message ${isUser ? 'user' : 'other'}`}>
     {message.contentType === 'text' && <p>{message.content}</p>}
     {message.contentType === 'image' && <img src={message.mediaUrl} alt="sent image" />}
-    {message.contentType === 'video' && <video src={message.mediaUrl} controls />}
-    {message.contentType === 'audio' && <CustomAudioPlayer audioSrc={message.mediaUrl} />}
+    {message.contentType === 'video' && <video src={message.mediaUrl as string} controls />}
+    {message.contentType === 'audio' && <CustomAudioPlayer audioSrc={message.mediaUrl as string} />}
     <span className="timestamp">{new Date(message.createdAt).toLocaleTimeString()}</span>
   </div>
 ));

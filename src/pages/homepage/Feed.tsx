@@ -8,6 +8,7 @@ import Cropper from 'react-easy-crop';
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid'; 
 import {  ModeNight,  LightMode, Diversity2 } from '@mui/icons-material';
+import imageCompression from 'browser-image-compression';
 
 
 // import '../../assets/styles/react-easy-crop.css'; // Import the CSS file
@@ -39,7 +40,9 @@ interface Post {
     _id: string;
     name: string;
     avatar?: string;
+    profilePic?: string;
   };
+  image: Array<{ imageUrl: string; description: string }>;
   title: string;
   description: string;
   location: {
@@ -47,9 +50,21 @@ interface Post {
     coordinates: number[];
     formatted: string;
   };
-  image: string[];
+  
+  peopleNeeded: number;
+  // image: string[];
   createdAt: string;
   requests: Array<{ user: string }>;
+}
+
+interface NewPost {
+  title: string;
+  description: string;
+  location: string;
+  date: string;
+  peopleNeeded: number;
+  coordinates: number[];
+  image: Array<{ imageUrl: string; description: string }>;
 }
 
 
@@ -67,14 +82,14 @@ const Feed = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newPost, setNewPost] = useState({
+  const [newPost, setNewPost] = useState<NewPost>({
     title: '',
     description: '',
     location: '',
     date: '',
     peopleNeeded: 0,
     coordinates: [] as number[],
-    image: [] as string[]
+    image: [] 
   });
   const [messageRequests, setMessageRequests] = useState<{ [key: string]: string }>({});
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -224,8 +239,11 @@ const Feed = () => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
-    canvas.width = pixelCrop.width;
-    canvas.height = pixelCrop.height;
+    const maxSize = 1024; // Max width or height
+    const scale = Math.min(maxSize / image.width, maxSize / image.height);
+    
+    canvas.width = pixelCrop.width * scale;
+    canvas.height = pixelCrop.height * scale;
 
     if (ctx) {
       ctx.drawImage(
@@ -236,8 +254,8 @@ const Feed = () => {
         pixelCrop.height,
         0,
         0,
-        pixelCrop.width,
-        pixelCrop.height
+        canvas.width,
+        canvas.height
       );
     }
 
@@ -247,9 +265,8 @@ const Feed = () => {
           console.error('Canvas is empty');
           return;
         }
-        const fileUrl = URL.createObjectURL(blob);
-        resolve(fileUrl);
-      });
+        resolve(blob);
+      }, 'image/jpeg', 0.9); // Adjust quality here (0.9 = 90% quality)
     });
   };
 
@@ -257,30 +274,46 @@ const Feed = () => {
     setSelectedImage(null);
     console.log('handleImageUploadToSupabase triggered');
     if (croppedAreaPixels && selectedImage) {
-      const croppedImageUrl = await getCroppedImg(URL.createObjectURL(selectedImage), croppedAreaPixels);
-      setCroppedImageUrl(croppedImageUrl as string);
+      try {
+        const croppedImageBlob = await getCroppedImg(URL.createObjectURL(selectedImage), croppedAreaPixels) as Blob;
+        console.log('Cropped image size:', croppedImageBlob.size);
 
-      const response = await fetch(croppedImageUrl as string);
-      const blob = await response.blob();
-      const uniqueFilename = `cropped-image-${uuidv4()}.jpg`; // Generate a unique filename
-      const file = new File([blob], uniqueFilename, { type: 'image/jpeg' });
-
-      const { data, error } = await supabase.storage
-        .from('ghosts')
-        .upload(`public/${file.name}`, file, {
-          cacheControl: '3600',
-          upsert: true,
-        });
-
-      if (error) {
-        console.error('Error uploading image:', error);
-      } else {
-        console.log('Image uploaded to Supabase:', data);
-        const imageUrl = `${supabaseUrl}/storage/v1/object/public/ghosts/${data.path}`;
-        console.log('Image uploaded to Supabase:', imageUrl);
-        setNewPost({ ...newPost, image: [{imageUrl : imageUrl , imageDescription : ''}] });
+        const uniqueFilename = `cropped-image-${uuidv4()}.jpg`;
         
-        setCroppedImageUrl(null);
+        // Only compress if the file is larger than 1MB
+        let fileToUpload: Blob | File = croppedImageBlob;
+        if (croppedImageBlob.size > 1024 * 1024) {
+          console.log('Starting compression...');
+          const compressedFile = await imageCompression(new File([croppedImageBlob], uniqueFilename, { type: 'image/jpeg' }), {
+            maxSizeMB: 1,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
+          });
+          console.log('Compression complete. Compressed file size:', compressedFile.size);
+          fileToUpload = compressedFile;
+        }
+
+        const { data, error } = await supabase.storage
+          .from('ghosts')
+          .upload(`public/${uniqueFilename}`, fileToUpload, {
+            cacheControl: '3600',
+            upsert: true,
+          });
+
+        if (error) {
+          console.error('Error uploading image:', error);
+          toast.error('Failed to upload image. Please try again.');
+        } else {
+          console.log('Image uploaded to Supabase:', data);
+          const imageUrl = `${supabaseUrl}/storage/v1/object/public/ghosts/${data.path}`;
+          console.log('Image URL:', imageUrl);
+          setNewPost({ ...newPost, image: [{imageUrl : imageUrl , description : ''}] });
+          setCroppedImageUrl('');
+          toast.success('Image uploaded successfully!');
+        }
+      } catch (err) {
+        console.error('Error in image processing:', err);
+        toast.error('An error occurred while processing the image.');
       }
     }
   };

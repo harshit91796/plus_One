@@ -92,8 +92,13 @@ const UploadAvatar = () => {
         console.log('Image uploaded to Supabase:', data);
         const imageUrl = `${supabaseUrl}/storage/v1/object/public/ghosts/${data.path}`;
         console.log('Image uploaded to Supabase:', imageUrl);
-        dispatch(setUser({ ...user, profilePic: imageUrl }));
-        await updateUser({ profilePic: imageUrl});
+        
+        if (user) {
+          dispatch(setUser({ ...user, profilePic: imageUrl }));
+          await updateUser({ profilePic: imageUrl });
+        } else {
+          console.error('User is null, cannot update profile picture');
+        }
         
         navigate('/');
 

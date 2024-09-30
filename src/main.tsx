@@ -30,8 +30,8 @@ const App: React.FC = () => {
   }
 
   return (
-    <Provider store={store}>
-      <RouterProvider router={router} />
+    <Provider store={ store}>
+      <RouterProvider router={router as any} />
     </Provider>
   );
 };
