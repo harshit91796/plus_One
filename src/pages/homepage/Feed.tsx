@@ -181,6 +181,20 @@ const Feed = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const sidebar = document.querySelector('.sidebar');
+      if (sidebar && !sidebar.contains(event.target as Node) && isSidebarOpen) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isSidebarOpen]);
+
   const handleLogout = () => {
     dispatch(clearUser());
     navigate('/login');
@@ -329,7 +343,10 @@ const Feed = () => {
   };
 
   if (loading) return <div>Loading posts...</div>;
-  if (error) return <div>{error}</div>;
+  if (error) {
+    dispatch(clearUser());
+    navigate('/login');
+  }
 
   return (
     <div className={`feedmain ${darkMode ? 'dark-mode' : ''}`}>

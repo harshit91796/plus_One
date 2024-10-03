@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import ConversationList from './ConversationList';
 import { getChats, getMessages, searchUsers } from '../../Api';
 import { sendMessageRequest } from '../../Api';
-import { useAppSelector } from '../../redux/hooks/hooks';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks/hooks';
 import './Conversation.css';
 import { initSocket, joinChatRoom, leaveRoom, socketSendMessage as  onMessageReceived, disconnectSocket } from '../../socket';
 // import { Modal } from '@mui/material';
@@ -11,6 +11,7 @@ import Modal from 'react-modal';
 // import { SearchResult } from '../path/to/SearchResult';
 
 import { ArrowBackIos } from '@mui/icons-material';
+import { clearUser } from '../../redux/user/userSlice';
 
 interface Chat {
   _id: string;
@@ -32,6 +33,7 @@ interface Chat {
 const ConversationPage: React.FC = () => {
   const navigate = useNavigate();
   const user = useAppSelector( (state) => state.user.user);
+  const dispatch = useAppDispatch();
   const [chats, setChats] = useState<Chat[]>([]);
   // const [messages, setMessages] = useState<Message[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
@@ -198,7 +200,8 @@ const ConversationPage: React.FC = () => {
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    dispatch(clearUser());
+    navigate('/login');
   }
 
   return (
