@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import "./explore.css";
 import { useAppSelector } from "../../redux/hooks/hooks";
-import ExploreTextAnimation from "./ExploreTextAnimation";
-import { ArrowBackIosNew, ArrowLeftOutlined } from "@mui/icons-material";
+
+import { ArrowBackIosNew } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 
 interface Post {

@@ -105,7 +105,7 @@ const Feed = () => {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-  const [searchRadius, setSearchRadius] = useState(10);
+  // const [searchRadius, setSearchRadius] = useState(10);
   const [newPost, setNewPost] = useState<NewPost>({
     title: '',
     description: '',
