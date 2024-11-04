@@ -24,6 +24,7 @@ import DirectMessagePage from "./pages/conversationSetep/DirectMessagePage";
 // import ConvoPage from "./pages/conversationSetep/dummy page/ConvoPage";
 // import ChatPage from "./pages/conversationSetep/dummy page/Chat";
 import Register from "./pages/loginSetup/Register";
+import Explore from "./pages/explorePage/Explore";
 
 
 
@@ -78,6 +79,10 @@ export const router = createBrowserRouter([
             <DirectMessagePage />
           </ProtectedRoute>
         ),
+      },
+      {
+        path: 'explore',
+        element: <Explore />,
       },
       
       

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import './feedMain.css'
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { RootState } from '../../redux/store';
@@ -7,10 +8,8 @@ import { fetchPlaceSuggestions } from '../../utils/opencage';
 import Cropper from 'react-easy-crop';
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid'; 
-import {  ModeNight,  LightMode, Diversity2 } from '@mui/icons-material';
+import {  ModeNight,  LightMode, Diversity2, Close, Tune, AllInclusive, Male, SupervisedUserCircle, Female } from '@mui/icons-material';
 import imageCompression from 'browser-image-compression';
-
-
 // import '../../assets/styles/react-easy-crop.css'; // Import the CSS file
 import {
   HomeIcon,
@@ -32,6 +31,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useAppSelector } from '../../redux/hooks/hooks';
 import { toggleDarkMode } from '../../redux/theme/themeSlice';
+import { FormControlLabel, Slider, styled, Switch } from "@mui/material";
 
 
 interface Post {
@@ -67,6 +67,28 @@ interface NewPost {
   image: Array<{ imageUrl: string; description: string }>;
 }
 
+const marks = [
+  {
+    value: 0,
+    label: '0 km',
+  },
+  {
+    value: 20,
+    label: '20 km',
+  },
+  {
+    value: 37,
+    label: '37 km',
+  },
+  {
+    value: 100,
+    label: '100 km',
+  },
+];
+
+function valuetext(value: number) {
+  return `${value} km`;
+}
 
 // Initialize Supabase client
 
@@ -82,6 +104,8 @@ const Feed = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [searchRadius, setSearchRadius] = useState(10);
   const [newPost, setNewPost] = useState<NewPost>({
     title: '',
     description: '',
@@ -101,6 +125,7 @@ const Feed = () => {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [croppedImageUrl, setCroppedImageUrl] = useState<string | null>(null);
   const [sentRequests, setSentRequests] = useState<{ [key: string]: boolean }>({});
+  const [isSearchRadius, setIsSearchRadius] = useState(false);
   const darkMode = useAppSelector((state) => state.theme.darkMode);
   useEffect(() => {
     loadPosts();
@@ -175,6 +200,14 @@ const Feed = () => {
       setError('Failed to send message request. Please try again.');
       toast.error('Failed to send message request.');
     }
+  };
+
+  const toggleSearchModal = () => {
+    setIsSearchModalOpen(!isSearchModalOpen);
+  };
+
+  const toggleSearchRadius = () => {
+    setIsSearchRadius(!isSearchRadius);
   };
 
   const toggleSidebar = () => {
@@ -342,6 +375,44 @@ const Feed = () => {
     });
   };
 
+  const Android12Switch = styled(Switch)(({ theme }) => (
+     console.log(theme),
+     theme.palette.primary.main = "#5ac8b0",
+    {
+   
+    padding: 8,
+    '& .MuiSwitch-track': {
+      borderRadius: 22 / 2,
+      '&::before, &::after': {
+        content: '""',
+        position: 'absolute',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        width: 16,
+        height: 16,
+        
+      },
+      '&::before': {
+        backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
+          theme.palette.getContrastText(theme.palette.primary.main),
+        )}" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>')`,
+        left: 12,
+      },
+      '&::after': {
+        backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
+          theme.palette.getContrastText(theme.palette.primary.main),
+        )}" d="M19,13H5V11H19V13Z" /></svg>')`,
+        right: 12,
+      },
+    },
+    '& .MuiSwitch-thumb': {
+      boxShadow: 'none',
+      width: 16,
+      height: 16,
+      margin: 2,
+    },
+  }));
+
   if (loading) return <div>Loading posts...</div>;
   if (error) {
     dispatch(clearUser());
@@ -395,7 +466,22 @@ const Feed = () => {
                   <img src={post.image[0].imageUrl} alt="Post" />
                   <div className="text-container">
                     <h3>{post.title}</h3>
-                    <h3 style={{display: 'flex', alignItems: 'center', gap: '10px' ,color: darkMode ? 'orange' : 'rgb(75 200 68)'}}><Diversity2/> <h3>:</h3> {post.peopleNeeded}</h3>
+                    <h3 className="" style={{display: 'flex', alignItems: 'center', gap: '10px' ,color: darkMode ? 'orange' : 'rgb(75 200 68)'}}><Diversity2/> <h3>:</h3> {post.peopleNeeded}</h3>
+                    <div className="gender-stats">
+                <div className="gender-item">
+                  <Male className="gender-icon" />
+                  <span>4</span>
+                </div>
+                <div className="gender-item">
+                  <Female className="gender-icon" />
+                  <span>3</span>
+                </div>
+                
+              </div>
+              <div className="gender-item">
+                  <SupervisedUserCircle className="gender-icon" />
+                  <span>2 </span>
+                </div>
                   </div>
                 </div>
               )}
@@ -411,8 +497,23 @@ const Feed = () => {
               </div>
               {post.image.length === 0 && (
                 <div style={{height: '50px',width: '100px'}} className="text-container">
-                    <h3>{post.title}</h3>
+                    {/* <h3>{post.title}</h3>
                     <h3 style={{display: 'flex', alignItems: 'center', gap: '10px' ,color: darkMode ? 'orange' : 'rgb(75 200 68)'}}><Diversity2/> <h3>:</h3> {post.peopleNeeded}</h3>
+                     Gender Statistics */}
+              <div className="gender-stats">
+                <div className="gender-item">
+                  <Male className="gender-icon" />
+                  <span>{} Needed</span>
+                </div>
+                <div className="gender-item">
+                  <Female className="gender-icon" />
+                  <span>{} Needed</span>
+                </div>
+                <div className="gender-item">
+                  <SupervisedUserCircle className="gender-icon" />
+                  <span>{} Joined</span>
+                </div>
+              </div>
                   </div>)}
               <p>{post.description}</p>
               {user && !sentRequests[post._id] && !post.requests?.some((request: any) => request.user === user._id) && (
@@ -433,11 +534,66 @@ const Feed = () => {
       <footer>
         <HomeIcon />
         <AddCircleRoundedIcon onClick={() => handleAuthenticatedAction(() => setIsModalOpen(true))} />
-        <SearchIcon />
+        <Link to="/explore">
+        <AllInclusive/>
+        </Link>
+        <SearchIcon onClick={toggleSearchModal}/>
         <Link to="/profile">
           <AccountCircleRoundedIcon/>
         </Link>
       </footer>
+
+      {isSearchModalOpen && (
+        <div className="modal-overlay">
+          
+          <div  className="modal">
+              {/* <Close onClick={toggleSearchModal}/> */}
+                <div style={{display: 'flex', alignItems: 'center',justifyContent: 'space-between', gap: '10px'}}>
+                  <h2 style={{marginTop: '20px'}}>Search Posts</h2>
+                  <div style={{display: 'flex',justifyContent: 'center', alignItems: 'center',gap: '10px'}}>
+                    <FormControlLabel
+                      control={<Android12Switch defaultChecked />}
+                      label="Search Radius"
+                    />
+                    <Tune onClick={toggleSearchRadius} />
+                    {isSearchRadius && (
+                  <div className="modal-overlay">
+                <div style={{marginBottom: '20px',color: darkMode ? 'white' : 'black'}} className="modal">
+                  <Close onClick={toggleSearchRadius}/>
+                  <h2>Search Radius</h2>
+                  <Slider
+                    style={{color: darkMode ? 'white' : 'black'}}
+                    aria-label="Custom marks"
+                    defaultValue={20}
+                    getAriaValueText={valuetext}
+                    step={1}
+                    valueLabelDisplay="auto"
+                    marks={marks}
+                    
+                  />
+                </div>
+              </div>)}
+                  </div>
+                </div>
+                <input onChange={handleLocationChange} style={{width: '100%',color: darkMode ? 'white' : 'black'}} type="text" placeholder="Search for users"/> 
+                {locationSuggestions.length > 0 && (
+                <ul className="suggestions-list">
+                  {locationSuggestions.map((suggestion, index) => (
+                    <li key={index} onClick={() => handleSuggestionClick(suggestion)}>
+                      {suggestion.formatted}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+                <div className="modal-buttons">
+                  <button type="submit">Search</button>
+                  <button type="button" onClick={() => setIsSearchModalOpen(false)}>Cancel</button>
+                </div>
+                
+          </div>
+        </div>
+      )}
 
       {isModalOpen && user && (
         <div className="modal-overlay">
