@@ -32,6 +32,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useAppSelector } from '../../redux/hooks/hooks';
 import { toggleDarkMode } from '../../redux/theme/themeSlice';
 import { FormControlLabel, Slider, styled, Switch } from "@mui/material";
+import PostModal from '../../components/modal/postModal/PostModal';
 
 
 interface Post {
@@ -50,9 +51,12 @@ interface Post {
     coordinates: number[];
     formatted: string;
   };
-  
   peopleNeeded: number;
-  // image: string[];
+  maleNeeded: number;
+  femaleNeeded: number;
+  joined: number;
+  maleJoined: number;
+  femaleJoined: number;
   createdAt: string;
   requests: Array<{ user: string }>;
 }
@@ -127,6 +131,8 @@ const Feed = () => {
   const [sentRequests, setSentRequests] = useState<{ [key: string]: boolean }>({});
   const [isSearchRadius, setIsSearchRadius] = useState(false);
   const darkMode = useAppSelector((state) => state.theme.darkMode);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+
   useEffect(() => {
     loadPosts();
     socket.on("connect", () => console.log("socket working"));
@@ -413,6 +419,10 @@ const Feed = () => {
     },
   }));
 
+  const handlePostClick = (post: Post) => {
+    setSelectedPost(post);
+  };
+
   if (loading) return <div>Loading posts...</div>;
   if (error) {
     dispatch(clearUser());
@@ -459,32 +469,55 @@ const Feed = () => {
         </div>
 
         {posts.map((post) => (
-          <div key={post._id} className="post-container">
-            <div className="imgcorosel">
-              {post.image && post.image.length > 0 && (
-                <div className="img-container">
-                  <img src={post.image[0].imageUrl} alt="Post" />
-                  <div className="text-container">
-                    <h3>{post.title}</h3>
-                    <h3 className="" style={{display: 'flex', alignItems: 'center', gap: '10px' ,color: darkMode ? 'orange' : 'rgb(75 200 68)'}}><Diversity2/> <h3>:</h3> {post.peopleNeeded}</h3>
-                    <div className="gender-stats">
-                <div className="gender-item">
-                  <Male className="gender-icon" />
-                  <span>4</span>
+          <div 
+            key={post._id} 
+            className="post-container"
+            onClick={() => handlePostClick(post)}
+          >
+            <div className="progress-wrapper">
+              <div className="progress-ring">
+                <div className="progress-circle">
+                  <span>75%</span>
                 </div>
-                <div className="gender-item">
-                  <Female className="gender-icon" />
-                  <span>3</span>
-                </div>
+              </div>
+            </div>
+
+            <div className="imgcorosel-wrapper">
+              <div className="imgcorosel">
+                {post.image && post.image.length > 0 && (
+                  post.image.map((img, index) => (
+                    <div key={index} className="img-container">
+                      <img src={img.imageUrl} alt={`Post Image ${index + 1}`} loading="lazy" />
+                    </div>
+                  ))
+                )}
                 
               </div>
-              <div className="gender-item">
-                  <SupervisedUserCircle className="gender-icon" />
-                  <span>2 </span>
-                </div>
-                  </div>
-                </div>
-              )}
+
+              {/* Fixed Gender Stats Overlay */}
+              <div className="gender-stats">
+              <h3>{post.title}</h3>
+                 {/* People Needed */}
+                 <div className="people-needed">
+                    
+                        <Diversity2 style={{ color: '#dbd553', marginRight: '5px' }} />
+                        <span style={{ color: 'white' }}>{post.peopleNeeded}</span>
+                      </div>
+                       <div style={{display: 'flex', alignItems: 'center', gap: '10px'}} >
+                       <div className="gender-item">
+                          <Male className="gender-icon" style={{ color: '#4a93e7' }} />
+                          <span>{post.maleNeeded} 1</span>
+                        </div>
+                        <div className="gender-item">
+                          <Female className="gender-icon" style={{ color: 'pink' }} />
+                          <span>{post.femaleNeeded} 2</span>
+                        </div>
+                        </div>
+                        <div className="gender-item">
+                          <SupervisedUserCircle className="gender-icon" />
+                          <span>{post.joined} Joined (M : 1, F : 2)</span>
+                        </div>
+              </div>
             </div>
 
             <div className="post-container-bottom">
@@ -495,26 +528,6 @@ const Feed = () => {
                   <h5>{post.location.formatted}</h5>
                 </div>
               </div>
-              {post.image.length === 0 && (
-                <div style={{height: '50px',width: '100px'}} className="text-container">
-                    {/* <h3>{post.title}</h3>
-                    <h3 style={{display: 'flex', alignItems: 'center', gap: '10px' ,color: darkMode ? 'orange' : 'rgb(75 200 68)'}}><Diversity2/> <h3>:</h3> {post.peopleNeeded}</h3>
-                     Gender Statistics */}
-              <div className="gender-stats">
-                <div className="gender-item">
-                  <Male className="gender-icon" />
-                  <span>{} Needed</span>
-                </div>
-                <div className="gender-item">
-                  <Female className="gender-icon" />
-                  <span>{} Needed</span>
-                </div>
-                <div className="gender-item">
-                  <SupervisedUserCircle className="gender-icon" />
-                  <span>{} Joined</span>
-                </div>
-              </div>
-                  </div>)}
               <p>{post.description}</p>
               {user && !sentRequests[post._id] && !post.requests?.some((request: any) => request.user === user._id) && (
                 <div className={`message-request-box ${darkMode ? 'dark-mode' : ''}`}>
@@ -524,7 +537,9 @@ const Feed = () => {
                     value={messageRequests[post._id] || ''}
                     onChange={(e) => handleMessageRequestChange(post._id, e.target.value)}
                   />
-                  <button className="send-request-button" onClick={() => handleSendMessageRequest(post._id, post.user._id)}>Send Request</button>
+                  <button className="send-request-button" onClick={() => handleSendMessageRequest(post._id, post.user._id)}>
+                    Send Request
+                  </button>
                 </div>
               )}
             </div>
@@ -683,6 +698,13 @@ const Feed = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {selectedPost && (
+        <PostModal
+          post = {selectedPost}
+          onClose={() => setSelectedPost(null)}
+        />
       )}
 
       <ToastContainer />
