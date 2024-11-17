@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // Base URL for your API
-const API_BASE_URL = 'https://fluoridated-silicon-birch.glitch.me/api';
+// const API_BASE_URL = 'https://fluoridated-silicon-birch.glitch.me/api';
+const API_BASE_URL = 'http://localhost:3007/api';
 
 // Create an axios instance with default config
 const api = axios.create({
@@ -150,9 +151,26 @@ export const logout = async () => {
 export const createPost = async (postData: {
   title: string;
   description: string;
-  location: string;
+  location: {
+    type: string;
+    coordinates: number[];
+    formatted: string;
+  };
   date: string;
+  startTime: string;
+  endTime: string;
   peopleNeeded: number;
+  maleNeeded: number;
+  femaleNeeded: number;
+  budget: {
+    min: number;
+    max: number;
+    tier: string | 'custom';
+  };
+  transportation: string;
+  difficulty: string;
+  checkpoints: string[];
+  image : Array<{imageUrl: string, imageDescription: string}>
 }) => {
   try {
     const response = await api.post('/post/create-post', postData);
@@ -330,3 +348,20 @@ export const fetchPosts = async () => {
     throw error;
   }
 };
+
+
+
+export const searchPosts = async (query: string) => {
+  console.log('query:', query);
+  try {
+    const response = await api.get(`/post/search?${query}`);
+    return response.data;
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+    } else {
+      console.error('An unknown error occurred');
+    }
+    throw error;
+  }
+}

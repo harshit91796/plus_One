@@ -4,23 +4,36 @@ import { Male, Female, SupervisedUserCircle, Diversity2, Close, CalendarMonth, L
 
 interface PostModalProps {
   post: {
+    _id: string;
+    user: {
+      _id: string;
+      name: string;
+      avatar?: string;
+      profilePic?: string;
+    };
+    image: Array<{ imageUrl: string; imageDescription: string }>;
     title: string;
     description: string;
-    image: Array<{ imageUrl: string }>;
+    location: {
+      type: string;
+      coordinates: number[];
+      formatted: string;
+    };
     peopleNeeded: number;
     maleNeeded: number;
     femaleNeeded: number;
     joined: number;
     maleJoined: number;
     femaleJoined: number;
-    user: {
-      name: string;
-      profilePic?: string;
+    checkpoints: string[];
+    createdAt: string;
+    requests: Array<{ user: string }>;
+    budget: {
+      tier: string;
+      min: number;
+      max: number;
     };
-    location: {
-      formatted: string;
-    };
-  };
+  }
   onClose: () => void;
 }
 
@@ -121,30 +134,24 @@ const PostModal: React.FC<PostModalProps> = ({ post, onClose }) => {
                   </div>
                   <div className='point-details'>
                     <h3>Starting Point</h3>
-                    <span>Mumbai, Maharashtra</span>
+                    <span>{post.checkpoints[0]}</span>
                   </div>
                 </div>
 
                 {/* Checkpoints */}
-                <div className='route-point checkpoint'>
-                  <div className='point-marker'>
-                    <div className='checkpoint-dot'></div>
-                  </div>
-                  <div className='point-details'>
-                    <h3>Checkpoint 1</h3>
-                    <span>Lonavala</span>
-                  </div>
-                </div>
-
-                <div className='route-point checkpoint'>
-                  <div className='point-marker'>
-                    <div className='checkpoint-dot'></div>
-                  </div>
-                  <div className='point-details'>
-                    <h3>Checkpoint 2</h3>
-                    <span>Pune</span>
-                  </div>
-                </div>
+               {/* [0,1,3] */}
+                {post.checkpoints.length >= 3 && post.checkpoints.slice(1, -1).map((checkpoint, index) => (
+                   <div className='route-point checkpoint'>
+                   <div className='point-marker'>
+                     <div className='checkpoint-dot'></div>
+                   </div>
+                   <div className='point-details'>
+                     <h3>Checkpoint {index + 2}</h3>
+                     <span>{checkpoint}</span>
+                   </div>
+                 </div>
+                ))}
+              
 
                 {/* Destination */}
                 <div className='route-point destination'>
@@ -153,7 +160,7 @@ const PostModal: React.FC<PostModalProps> = ({ post, onClose }) => {
                   </div>
                   <div className='point-details'>
                     <h3>Destination</h3>
-                    <span>Mahabaleshwar</span>
+                    <span>{post.checkpoints[post.checkpoints.length - 1]}</span>
                   </div>
                 </div>
 
@@ -166,24 +173,32 @@ const PostModal: React.FC<PostModalProps> = ({ post, onClose }) => {
             <div className='trip-budget'>
                 <h1>Budget</h1>
                 <div className='budget-tier-container'>
-                  <div className='budget-tier backpacker'>
-                    <h3>Backpacker</h3>
-                    <span className='price'>₹2,000 - ₹5,000</span>
-                    <span className='description'>Budget-friendly, basic accommodations and local transport</span>
-                  </div>
+                  {post.budget.tier === 'backpacker' && (
+                    <div className='budget-tier backpacker'>
+                      <h3>Backpacker</h3>
+                      <span className='price'>₹2,000 - ₹5,000</span>
+                      <span className='description'>Budget-friendly, basic accommodations and local transport</span>
+                    </div>
+                  )}
 
-                  <div className='budget-tier comfort'>
-                    <h3>Comfort Seeker</h3>
-                    <span className='price'>₹5,000 - ₹12,000</span>
-                    <span className='description'>Mid-range hotels and comfortable travel options</span>
-                  </div>
+                  {post.budget.tier === 'Comfort Seeker' && (
+                    <div className='budget-tier comfort'>
+                      <h3>Comfort Seeker</h3>
+                      <span className='price'>₹5,000 - ₹12,000</span>
+                      <span className='description'>Mid-range hotels and comfortable travel options</span>
+                    </div>
+                  )}
 
-                  <div className='budget-tier luxury'>
-                    <h3>Luxury Explorer</h3>
-                    <span className='price'>₹12,000+</span>
-                    <span className='description'>Premium resorts and exclusive experiences</span>
-                  </div>
+                  {post.budget.tier === 'Luxury Explorer' && (
+                    <div className='budget-tier luxury'>
+                      <h3>Luxury Explorer</h3>
+                      <span className='price'>₹12,000+</span>
+                      <span className='description'>Premium resorts and exclusive experiences</span>
+                    </div>
+                  )}
                 </div>
+
+                    
              </div>
           </div>
         </div>

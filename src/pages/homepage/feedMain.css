@@ -1,3 +1,5 @@
+@import '../../assets/styles/typography.css';
+
 /* CSS Variables for Theming */
 :root {
   /* Light Theme Colors */
@@ -34,6 +36,46 @@
 }
 
 /* Base Styles */
+.load-more-button {
+  background-color: var(--accent-color);
+  color: white;
+  margin-bottom: 40px auto;
+}
+
+.close-search-results {
+  font-size: 2rem;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.search-results {
+  position: absolute;
+  top: 80%;
+    left: 43%;
+    width: 54px;
+    height: 54px;
+    background-color: var(--card-bg);
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.search-results .close-search-results {
+  font-size: 2.5rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  margin-left: 7px;
+    margin-top: 7px;
+}
+
+.no-posts {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .feedmain {
   width: 100%;
   height: 100%;
@@ -196,7 +238,7 @@
   width: 100%;
   height: 5%;
   position: fixed;
-  z-index: 5;
+  z-index: 1000;
   top: 0;
   left: 0;
   background-color: var(--card-bg);
@@ -259,6 +301,7 @@
   border-radius: 20px;
   margin-right: 8px;
   font-size: 1vmax;
+  background-color: var(--card-bg);
 }
 
 .send-request-button {
@@ -317,6 +360,7 @@
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  background-color: var(--card-bg);
 }
 
 .modal-buttons {
@@ -363,108 +407,147 @@
   background-color: var(--button-hover);
 }
 
-/* Sidebar Styles */
+/* Updated Sidebar Styles */
 .sidebar {
   position: fixed;
-  left: -200px;
+  left: -280px; /* Increased width */
   top: 0;
-  width: 50px;
+  width: 280px;
   height: 100%;
   background-color: var(--card-bg);
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-  transition: left 0.3s ease-in-out;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
   z-index: 1000;
+  overflow-y: auto;
 }
 
 .sidebar.open {
   left: 0;
-  top: -10px;
+  top: 0;
   height: 100vh;
-  width: 200px;
 }
 
 .sidebar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 6px;
+  border-bottom: 1px solid var(--border-color);
+  background: linear-gradient(to right, #333367, #278f7a);
+  color: white;
+}
+
+.sidebar-header button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
 }
 
 .sidebar-content {
-  padding: 20px;
+  padding: 15px;
+}
+
+.sidebar-section {
+  margin-bottom: 20px;
+}
+
+.sidebar-section-title {
+  font-size: 14px;
+  color: var(--secondary-text);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  padding-left: 10px;
 }
 
 .sidebar-item {
   display: flex;
   align-items: center;
-  padding: 10px 0;
-  color: #333;
+  padding: 12px 15px;
+  color: var(--text-primary);
   text-decoration: none;
-  font-size: 16px;
+  font-size: 15px;
+  border-radius: 10px;
+  margin-bottom: 5px;
+  transition: all 0.2s ease;
+}
+
+.sidebar-item:hover {
+  background-color: var(--hover-bg);
+  transform: translateX(5px);
+}
+
+.sidebar-item.active {
+  background-color: var(--accent-color);
+  color: white;
 }
 
 .sidebar-item svg {
-  margin-right: 10px;
+  margin-right: 12px;
   font-size: 20px;
 }
 
-/* Dark Mode Sidebar */
-.feedmain.dark-mode .sidebar {
-  background-color: #1e1e1e;
-  color: #ffffff;
+.sidebar-divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 15px 0;
 }
 
-.feedmain.dark-mode .sidebar-header {
-  border-bottom-color: #333;
+.user-profile {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border-radius: 10px;
+  background-color: var(--hover-bg);
+  margin-bottom: 20px;
 }
 
-.feedmain.dark-mode .sidebar .sidebar-item {
-  color: #ffffff;
+.user-profile img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 12px;
 }
 
-.feedmain.dark-mode .sidebar .sidebar-item:hover {
-  color: #5ac8b0;
+.user-profile-info {
+  flex: 1;
 }
 
-/* Dark Mode Modal */
-.feedmain.dark-mode .modal {
-  background-color: #1e1e1e;
-  color: #ffffff;
+.user-profile-info h4 {
+  margin: 0;
+  font-size: 16px;
 }
 
-.feedmain.dark-mode .modal input,
-.feedmain.dark-mode .modal textarea {
-  background-color: #333;
-  color: #ffffff;
-  border-color: #444;
+.user-profile-info p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--secondary-text);
 }
 
-/* Dark Mode Crop Container */
-.feedmain.dark-mode .crop-container {
-  background-color: #1e1e1e;
+.logout-button {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 20px;
 }
 
-.feedmain.dark-mode .crop-button {
-  background-color: #5ac8b0;
+.logout-button:hover {
+  background-color: var(--button-hover);
 }
 
-.feedmain.dark-mode .crop-button:hover {
-  background-color: #3da08b;
+/* Dark Mode Overrides */
+.feedmain.dark-mode .sidebar-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
-.feedmain.dark-mode .message-request-box input {
-  background-color: #1e1e1e;
-  color: #ffffff;
-  border-color: #444;
-}
-
-.feedmain.dark-mode .send-request-button {
-  background-color: #5ac8b0;
-}
-
-.feedmain.dark-mode .send-request-button:hover {
-  background-color: #3da08b;
+.feedmain.dark-mode .user-profile {
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 /* Responsive Styles */
@@ -591,3 +674,282 @@
   }
 }
 
+
+/* Then update the typography-related styles */
+
+/* Post Title */
+.gender-stats h3 {
+  font-family: var(--font-primary);
+  font-size: 30px;
+  font-weight: var(--font-bold);
+  line-height: var(--leading-tight);
+  margin-bottom: 8px;
+}
+
+/* User Info */
+.post-container .post-container-bottom .user-info div h3 {
+  font-family: var(--font-primary);
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-tight);
+}
+
+.post-container .post-container-bottom .user-info div h5 {
+  font-family: var(--font-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-regular);
+  color: var(--secondary-text);
+}
+
+/* Post Description */
+.post-container .post-container-bottom p {
+  font-family: var(--font-secondary);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  color: var(--text-primary);
+  margin: 10px 0;
+}
+
+/* Header */
+.feedmain .feedTop h2 {
+  margin-bottom: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  line-height: var(--leading-tight);
+}
+
+/* Gender Stats */
+.gender-stats .gender-item span {
+  font-family: var(--font-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+}
+
+/* Message Request Box */
+.message-request-box input {
+  font-family: var(--font-secondary);
+  font-size: var(--text-base);
+}
+
+.send-request-button {
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  letter-spacing: var(--tracking-wide);
+}
+
+/* Sidebar Typography */
+.sidebar-header h2 {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-semibold);
+  margin-bottom: 0;
+  background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+}
+
+.sidebar-section-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  letter-spacing: var(--tracking-wide);
+  text-transform: lowercase;
+  color: var(--accent-color);
+  margin-bottom: 15px;
+  padding-left: 15px;
+}
+
+.sidebar-item {
+  font-family: var(--font-secondary);
+  font-size: var(--text-base);
+  font-weight: var(--font-regular);
+  letter-spacing: 0.01em;
+  padding: 12px 15px;
+  transition: all 0.3s ease;
+}
+
+.sidebar-item:hover {
+  background: linear-gradient(45deg, rgba(255,107,107,0.1), rgba(78,205,196,0.1));
+  transform: translateX(5px);
+}
+
+.user-profile-info h4 {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: var(--font-medium);
+  margin-bottom: 4px;
+  background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.user-profile-info p {
+  font-family: var(--font-secondary);
+  font-size: var(--text-sm);
+  color: var(--secondary-text);
+  letter-spacing: 0.01em;
+}
+
+/* Update logout button */
+.logout-button {
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  letter-spacing: var(--tracking-wide);
+  text-transform: lowercase;
+  background: linear-gradient(45deg, --, #278f7a);
+  border: none;
+  padding: 12px 20px;
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255,107,107,0.2);
+}
+
+/* Add some fun animations */
+@keyframes slideIn {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.sidebar.open .sidebar-section {
+  animation: slideIn 0.3s ease forwards;
+}
+
+.sidebar.open .sidebar-section:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.sidebar.open .sidebar-section:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+/* Modal Typography */
+.modal h2 {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-tight);
+}
+
+.modal p {
+  font-family: var(--font-secondary);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+}
+
+.modal input,
+.modal textarea {
+  font-family: var(--font-secondary);
+  font-size: var(--text-base);
+}
+
+.modal-buttons button {
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  letter-spacing: var(--tracking-wide);
+}
+
+/* Progress Circle */
+.progress-circle span {
+  font-family: var(--font-accent);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+}
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+  .feedmain .feedTop h2 {
+    font-size: var(--text-3xl);
+  }
+
+  .gender-stats h3 {
+    font-size: 30px;
+  }
+
+  .post-container .post-container-bottom .user-info div h3 {
+    font-size: var(--text-base);
+  }
+
+  .post-container .post-container-bottom .user-info div h5 {
+    font-size: var(--text-xs);
+  }
+
+  .gender-stats .gender-item span {
+    font-size: var(--text-xs);
+  }
+
+  .message-request-box input,
+  .send-request-button {
+    font-size: var(--text-sm);
+  }
+}
+
+/* For main headings with gradient */
+.main-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* For funky accent text */
+.accent-text {
+  font-family: var(--font-accent);
+  font-size: var(--text-lg);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+}
+
+
+/* Add these fun hover effects */
+.post-container .post-container-bottom .user-info div h3 {
+  font-family: var(--font-heading);
+  transition: transform 0.3s ease;
+}
+
+.post-container .post-container-bottom .user-info div h3:hover {
+  transform: scale(1.05) rotate(-2deg);
+}
+
+/* Fun animation for main title */
+@keyframes wiggle {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg); }
+  75% { transform: rotate(3deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.main-title:hover {
+  animation: wiggle 0.5s ease;
+}
+
+/* Funky gradient border for important elements */
+.sidebar-header {
+  border-image: linear-gradient(45deg, #FF6B6B, #4ECDC4) 1;
+  border-width: 3px;
+  border-style: solid;
+}
+
+/* Add some playful shadows */
+.post-container:hover {
+  box-shadow: 
+    0 10px 20px rgba(0,0,0,0.1),
+    0 6px 6px rgba(0,0,0,0.1),
+    0 0 100px rgba(78,205,196,0.1);
+  transform: translateY(-5px);
+}

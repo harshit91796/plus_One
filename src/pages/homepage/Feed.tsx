@@ -1,15 +1,14 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState} from "react";
 import './feedMain.css'
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { RootState } from '../../redux/store';
-import { fetchPosts, createPost, sendMessageRequest } from '../../Api';
+import {  searchPosts, sendMessageRequest } from '../../Api';
 import { fetchPlaceSuggestions } from '../../utils/opencage';
-import Cropper from 'react-easy-crop';
-import { createClient } from '@supabase/supabase-js';
-import { v4 as uuidv4 } from 'uuid'; 
-import {  ModeNight,  LightMode, Diversity2, Close, Tune, AllInclusive, Male, SupervisedUserCircle, Female } from '@mui/icons-material';
-import imageCompression from 'browser-image-compression';
+import { v4 as uuidv4 } from 'uuid';
+
+import {  ModeNight,  LightMode, Diversity2, Close, Tune, AllInclusive, Male, SupervisedUserCircle, Female, Group, Bookmark, Event, TrendingUp, HelpOutline } from '@mui/icons-material';
+
 // import '../../assets/styles/react-easy-crop.css'; // Import the CSS file
 import {
   HomeIcon,
@@ -22,6 +21,7 @@ import {
   SettingsIcon,
   LogoutIcon,
   MessageIcon,
+  PeopleIcon,
 } from "../../assets/Icons";
 import { socket } from "../../utils/socket";
 import { Link } from "react-router-dom";
@@ -35,6 +35,7 @@ import { FormControlLabel, Slider, styled, Switch } from "@mui/material";
 import PostModal from '../../components/modal/postModal/PostModal';
 
 
+
 interface Post {
   _id: string;
   user: {
@@ -43,7 +44,7 @@ interface Post {
     avatar?: string;
     profilePic?: string;
   };
-  image: Array<{ imageUrl: string; description: string }>;
+  image: Array<{ imageUrl: string; imageDescription: string }>;
   title: string;
   description: string;
   location: {
@@ -57,19 +58,25 @@ interface Post {
   joined: number;
   maleJoined: number;
   femaleJoined: number;
+  checkpoints: string[];
   createdAt: string;
   requests: Array<{ user: string }>;
+  budget: {
+    tier: string;
+    min: number;
+    max: number;
+  };
 }
 
-interface NewPost {
-  title: string;
-  description: string;
-  location: string;
-  date: string;
-  peopleNeeded: number;
-  coordinates: number[];
-  image: Array<{ imageUrl: string; description: string }>;
-}
+// interface NewPost {
+//   title: string;
+//   description: string;
+//   location: string;
+//   date: string;
+//   peopleNeeded: number;
+//   coordinates: number[];
+//   image: Array<{ imageUrl: string; description: string }>;
+// }
 
 const marks = [
   {
@@ -94,12 +101,6 @@ function valuetext(value: number) {
   return `${value} km`;
 }
 
-// Initialize Supabase client
-
-const supabaseUrl = 'https://ziruawrcztsttxzvlsuz.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppcnVhd3JjenRzdHR4enZsc3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjY5MDUyNjcsImV4cCI6MjA0MjQ4MTI2N30.YIYgAo7Z8Kb2PuLZtYYQaymdjAySWqdnzraa-0Loj20';
-const supabase = createClient(supabaseUrl, supabaseKey);
-
 const Feed = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -107,50 +108,86 @@ const Feed = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   // const [searchRadius, setSearchRadius] = useState(10);
-  const [newPost, setNewPost] = useState<NewPost>({
-    title: '',
-    description: '',
-    location: '',
-    date: '',
-    peopleNeeded: 0,
-    coordinates: [] as number[],
-    image: [] 
-  });
+  // const [newPost, setNewPost] = useState<NewPost>({
+  //   title: '',
+  //   description: '',
+  //   location: '',
+  //   date: '',
+  //   peopleNeeded: 0,
+  //   coordinates: [] as number[],
+  //   image: [] 
+  // });
   const [messageRequests, setMessageRequests] = useState<{ [key: string]: string }>({});
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [locationSuggestions, setLocationSuggestions] = useState<{ formatted: string, coordinates: { lat: number, lng: number } }[]>([]);
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
-  const [croppedImageUrl, setCroppedImageUrl] = useState<string | null>(null);
+ 
   const [sentRequests, setSentRequests] = useState<{ [key: string]: boolean }>({});
   const [isSearchRadius, setIsSearchRadius] = useState(false);
   const darkMode = useAppSelector((state) => state.theme.darkMode);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [searchResults, setSearchResults] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchTitleQuery, setSearchTitleQuery] = useState<string>('');
+  // const [searchRadius, setSearchRadius] = useState<Boolean>(false);
+  const [searchRadiusRange, setSearchRadiusRange] = useState<number>(10);
+  const [currentLocation, setCurrentLocation] = useState<{ currentLatitude: number, currentLongitude: number } | null>(null);
+  const [skip, setSkip] = useState(0);
+  // const [postLimit, setPostLimit] = useState(2);
+  const [hasMore, setHasMore] = useState(true);
+  
+
+const postLimit = 4;
+
 
   useEffect(() => {
     loadPosts();
+    
     socket.on("connect", () => console.log("socket working"));
-    console.log('user:', user);
+    console.log('user:', user, 'currentLocation:', currentLocation, 'searchRadiusRange:', searchRadiusRange);
+  }, [currentLocation]);
+
+  // Add this useEffect for getting user's location
+useEffect(() => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setCurrentLocation({
+          currentLatitude: position.coords.latitude,
+          currentLongitude: position.coords.longitude
+        });
+      },
+      (error) => console.error('Error getting location:', error)
+    );
+    }
   }, []);
 
   const loadPosts = async () => {
     try {
-      const response = await fetchPosts();
-      if (response.success && Array.isArray(response.posts)) {
-        // Add dummy images to the posts
-        // const postsWithImages = response.posts.map((post, index) => ({
-        //   ...post,
-        //   image: [dummyImages[index % dummyImages.length]]
-        // }));
-        // setPosts(postsWithImages);
-        console.log('response.posts:', response.posts);
-        setPosts(response.posts);
+      console.log('Loading posts with skip:', skip); // Debug log
+      
+      const query = new URLSearchParams({
+        query: searchQuery,
+        skip: skip.toString(),
+        limit: postLimit.toString(),
+        currentLatitude: currentLocation?.currentLatitude.toString() || '',
+        currentLongitude: currentLocation?.currentLongitude.toString() || '',
+        range: currentLocation ? (searchRadiusRange*1000).toString() : ''
+      }).toString();
+
+      const response = await searchPosts(query);
+      if (response.success) {
+        if (skip > 0) {
+          setPosts(prevPosts => [...prevPosts, ...response.data.posts]);
+        } else {
+          setPosts(response.data.posts);
+        }
+        
+        setHasMore(response.data.posts.length === postLimit);
+        console.log('Posts loaded:', response.data.posts.length, 'hasMore:', response.data.posts.length === postLimit);
       } else {
         throw new Error('Invalid response format');
       }
@@ -162,23 +199,41 @@ const Feed = () => {
     }
   };
 
-  const handleCreatePost = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('newPost:', newPost);
-    try {
-      const response = await createPost(newPost);
-      if (response.success) {
-        setIsModalOpen(false);
-        setNewPost({ title: '', description: '', location: '', date: '', peopleNeeded: 0, coordinates: [], image: [] });
-        loadPosts();
-      } else {
-        throw new Error('Failed to create post');
-      }
-    } catch (err) {
-      console.error('Error creating post:', err);
-      setError('Failed to create post. Please try again.');
+  // Add this useEffect to trigger search
+useEffect(() => {
+  loadPosts();
+}, [skip, searchQuery]);
+
+// Load posts when page changes
+
+
+const handleInfiniteScroll = async () => {
+  try {
+    if (
+      window.innerHeight + document.documentElement.scrollTop + 1 >=
+      document.documentElement.scrollHeight
+    ) {
+      setLoading(true);
+      setSkip(prev => prev + postLimit);
     }
-  };
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+useEffect(() => {
+  window.addEventListener("scroll", handleInfiniteScroll);
+  return () => window.removeEventListener("scroll", handleInfiniteScroll);
+}, []);
+
+  // Add this function for infinite scroll
+const loadMore = () => {
+  console.log('loading more posts');
+  if (hasMore ) {
+    setSkip(prevSkip => prevSkip + postLimit);
+    
+  }
+};
 
   const handleMessageRequestChange = (postId: string, message: string) => {
     setMessageRequests({ ...messageRequests, [postId]: message });
@@ -254,7 +309,8 @@ const Feed = () => {
 
   const handleLocationChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
-    setNewPost({ ...newPost, location: query });
+    setSearchTitleQuery(query);
+    // setNewPost({ ...newPost, location: query });
     if (query.length > 2) {
       const suggestions = await fetchPlaceSuggestions(query);
       setLocationSuggestions(suggestions);
@@ -264,122 +320,38 @@ const Feed = () => {
   };
 
   const handleSuggestionClick = (suggestion: { formatted: string, coordinates: { lat: number, lng: number } }) => {
-    setNewPost({ 
-      ...newPost, 
-      location: suggestion.formatted,
-      coordinates: [suggestion.coordinates.lng, suggestion.coordinates.lat] // Store coordinates
-    });
+    // setNewPost({ 
+    //   ...newPost, 
+    //   location: suggestion.formatted,
+    //   coordinates: [suggestion.coordinates.lng, suggestion.coordinates.lat] // Store coordinates
+    // });
+    setSearchQuery(suggestion.formatted);
+
     
+    
+  };
+
+  const handleSearch = () => {
+    console.log('Searching for posts...');
+    // Add your search logic here
+    setSkip(0);
+    setSearchQuery(searchTitleQuery);
+    loadPosts();
+    setIsSearchModalOpen(false);
     setLocationSuggestions([]);
+    setSearchResults(true);
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedImage(file);
-    }
+  const closeSearchResults = () => {
+    setSearchResults(false);
+    setSearchQuery('');
+    setSearchTitleQuery('');
+    setLocationSuggestions([]);
+    setSkip(0);
   };
 
-  const onCropComplete = useCallback((
-    _: unknown,
-    croppedAreaPixels: any
-  ) => {
-    setCroppedAreaPixels(croppedAreaPixels);
-  }, []);
-
-  const getCroppedImg = async (imageSrc: string, pixelCrop: any) => {
-    const image = await createImage(imageSrc);
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-
-    const maxSize = 1024; // Max width or height
-    const scale = Math.min(maxSize / image.width, maxSize / image.height);
-    
-    canvas.width = pixelCrop.width * scale;
-    canvas.height = pixelCrop.height * scale;
-
-    if (ctx) {
-      ctx.drawImage(
-        image,
-        pixelCrop.x,
-        pixelCrop.y,
-        pixelCrop.width,
-        pixelCrop.height,
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
-    }
-
-    return new Promise((resolve) => {
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          console.error('Canvas is empty');
-          return;
-        }
-        resolve(blob);
-      }, 'image/jpeg', 0.9); // Adjust quality here (0.9 = 90% quality)
-    });
-  };
-
-  const handleImageUploadToSupabase = async () => {
-    setSelectedImage(null);
-    console.log('handleImageUploadToSupabase triggered');
-    if (croppedAreaPixels && selectedImage) {
-      try {
-        const croppedImageBlob = await getCroppedImg(URL.createObjectURL(selectedImage), croppedAreaPixels) as Blob;
-        console.log('Cropped image size:', croppedImageBlob.size);
-
-        const uniqueFilename = `cropped-image-${uuidv4()}.jpg`;
-        
-        // Only compress if the file is larger than 1MB
-        let fileToUpload: Blob | File = croppedImageBlob;
-        if (croppedImageBlob.size > 1024 * 1024) {
-          console.log('Starting compression...');
-          const compressedFile = await imageCompression(new File([croppedImageBlob], uniqueFilename, { type: 'image/jpeg' }), {
-            maxSizeMB: 1,
-            maxWidthOrHeight: 1920,
-            useWebWorker: true,
-          });
-          console.log('Compression complete. Compressed file size:', compressedFile.size);
-          fileToUpload = compressedFile;
-        }
-
-        const { data, error } = await supabase.storage
-          .from('ghosts')
-          .upload(`public/${uniqueFilename}`, fileToUpload, {
-            cacheControl: '3600',
-            upsert: true,
-          });
-
-        if (error) {
-          console.error('Error uploading image:', error);
-          toast.error('Failed to upload image. Please try again.');
-        } else {
-          console.log('Image uploaded to Supabase:', data);
-          const imageUrl = `${supabaseUrl}/storage/v1/object/public/ghosts/${data.path}`;
-          console.log('Image URL:', imageUrl);
-          setNewPost({ ...newPost, image: [{imageUrl : imageUrl , description : ''}] });
-          setCroppedImageUrl('');
-          toast.success('Image uploaded successfully!');
-        }
-      } catch (err) {
-        console.error('Error in image processing:', err);
-        toast.error('An error occurred while processing the image.');
-      }
-    }
-  };
-
-  const createImage = (url: string): Promise<HTMLImageElement> => {
-    return new Promise((resolve, reject) => {
-      const image = new Image();
-      image.addEventListener('load', () => resolve(image));
-      image.addEventListener('error', (error) => reject(error));
-      image.setAttribute('crossOrigin', 'anonymous'); // to avoid CORS issues
-      image.src = url;
-    });
-  };
+ 
+ 
 
   const Android12Switch = styled(Switch)(({ theme }) => (
      console.log(theme),
@@ -436,23 +408,88 @@ const Feed = () => {
           <h2>Menu</h2>
           <button onClick={toggleSidebar}>&times;</button>
         </div>
+        
         <div className="sidebar-content">
-          <Link to="/settings" className="sidebar-item">
-            <SettingsIcon />
-            <span>Settings</span>
-          </Link>
-          <Link to="/conversations" className="sidebar-item">
-            <MessageIcon />
-            <span>Messages</span>
-          </Link>
-           <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
-           <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
-          <div onClick={() => dispatch(toggleDarkMode())} className="sidebar-item">
-             {darkMode ?  <LightMode/> : <ModeNight/>}
+          {/* User Profile Section */}
+          <div className="user-profile">
+            <img src={user?.profilePic || "/default-avatar.png"} alt="Profile" />
+            <div className="user-profile-info">
+              <h4>{user?.name || "Guest User"}</h4>
+              <p>{user?.email || "Please login"}</p>
+            </div>
           </div>
 
-           </div>
-          <button onClick={handleLogout} className="sidebar-item logout-button">
+          {/* Main Navigation */}
+          <div className="sidebar-section">
+            <div className="sidebar-section-title">Main</div>
+            <Link to="/" className="sidebar-item">
+              <HomeIcon />
+              <span>Home</span>
+            </Link>
+            <Link to="/explore" className="sidebar-item">
+              <ExploreOutlinedIcon />
+              <span>Explore</span>
+            </Link>
+            <Link to="/notifications" className="sidebar-item">
+              <NotificationsNoneIcon />
+              <span>Notifications</span>
+            </Link>
+          </div>
+
+          {/* Social Section */}
+          <div className="sidebar-section">
+            <div className="sidebar-section-title">Social</div>
+            <Link to="/conversations" className="sidebar-item">
+              <MessageIcon />
+              <span>Messages</span>
+            </Link>
+            <Link to="/friends" className="sidebar-item">
+              <PeopleIcon />
+              <span>Friends</span>
+            </Link>
+            <Link to="/groups" className="sidebar-item">
+              <Group />
+              <span>Groups</span>
+            </Link>
+          </div>
+
+          {/* Content Section */}
+          <div className="sidebar-section">
+            <div className="sidebar-section-title">Content</div>
+            <Link to="/saved" className="sidebar-item">
+              <Bookmark />
+              <span>Saved Posts</span>
+            </Link>
+            <Link to="/events" className="sidebar-item">
+              <Event />
+              <span>Events</span>
+            </Link>
+            <Link to="/trending" className="sidebar-item">
+              <TrendingUp />
+              <span>Trending</span>
+            </Link>
+          </div>
+
+          {/* Settings Section */}
+          <div className="sidebar-section">
+            <div className="sidebar-section-title">Preferences</div>
+            <Link to="/settings" className="sidebar-item">
+              <SettingsIcon />
+              <span>Settings</span>
+            </Link>
+            <div className="sidebar-item" onClick={() => dispatch(toggleDarkMode())}>
+              {darkMode ? <LightMode /> : <ModeNight />}
+              <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
+            </div>
+            <Link to="/help" className="sidebar-item">
+              <HelpOutline />
+              <span>Help & Support</span>
+            </Link>
+          </div>
+
+          <div className="sidebar-divider" />
+          
+          <button onClick={handleLogout} className="logout-button">
             <LogoutIcon />
             <span>Logout</span>
           </button>
@@ -468,9 +505,9 @@ const Feed = () => {
           </span>
         </div>
 
-        {posts.map((post) => (
+        {posts.length > 0 ? posts.map((post) => (
           <div 
-            key={post._id} 
+            key={uuidv4()} 
             className="post-container"
             onClick={() => handlePostClick(post)}
           >
@@ -504,14 +541,28 @@ const Feed = () => {
                         <span style={{ color: 'white' }}>{post.peopleNeeded}</span>
                       </div>
                        <div style={{display: 'flex', alignItems: 'center', gap: '10px'}} >
-                       <div className="gender-item">
-                          <Male className="gender-icon" style={{ color: '#4a93e7' }} />
-                          <span>{post.maleNeeded} 1</span>
-                        </div>
-                        <div className="gender-item">
-                          <Female className="gender-icon" style={{ color: 'pink' }} />
-                          <span>{post.femaleNeeded} 2</span>
-                        </div>
+                      { post.maleNeeded || post.femaleNeeded ? (
+                        <>
+                         {post.maleNeeded ? (
+                          <div className="gender-item">
+                            <Male className="gender-icon" style={{ color: '#4a93e7' }} />
+                            <span>{post.maleNeeded}</span>
+                          </div>
+                         ) : (
+                          <></>
+                         )}
+                        {post.femaleNeeded ? (
+                          <div className="gender-item">
+                            <Female className="gender-icon" style={{ color: 'pink' }} />
+                            <span>{post.femaleNeeded}</span>
+                          </div>
+                        ) : (
+                          <></>
+                        )}
+                        </>
+                      ) : (
+                        <></>
+                      )}
                         </div>
                         <div className="gender-item">
                           <SupervisedUserCircle className="gender-icon" />
@@ -530,25 +581,64 @@ const Feed = () => {
               </div>
               <p>{post.description}</p>
               {user && !sentRequests[post._id] && !post.requests?.some((request: any) => request.user === user._id) && (
-                <div className={`message-request-box ${darkMode ? 'dark-mode' : ''}`}>
+                <div 
+                  className={`message-request-box ${darkMode ? 'dark-mode' : ''}`}
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <input
                     type="text"
                     placeholder="Send a message to join this group"
                     value={messageRequests[post._id] || ''}
                     onChange={(e) => handleMessageRequestChange(post._id, e.target.value)}
                   />
-                  <button className="send-request-button" onClick={() => handleSendMessageRequest(post._id, post.user._id)}>
+                  <button 
+                    className="send-request-button" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSendMessageRequest(post._id, post.user._id);
+                    }}
+                  >
                     Send Request
                   </button>
                 </div>
               )}
             </div>
           </div>
-        ))}
+        )) : <>
+        <div className="no-posts">
+          <h2>No posts found</h2>
+        </div>
+        </>}
+
+    {hasMore && !loading && (
+      <button 
+      
+        className="load-more-button" 
+        onClick={loadMore}
+        style={{
+          height: '50px',
+          margin: '20px auto',
+          padding: '10px 20px',
+          display: 'block',
+          backgroundColor: '#5ac8b0',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer'
+        }}
+      >
+        Load More
+      </button>
+    )}
+    {searchResults && (
+      <div onClick={closeSearchResults} className="search-results">
+        <Close className="close-search-results" onClick={closeSearchResults}/>
+      </div>
+    )}
       </div>
       <footer>
         <HomeIcon />
-        <AddCircleRoundedIcon onClick={() => handleAuthenticatedAction(() => setIsModalOpen(true))} />
+        <AddCircleRoundedIcon onClick={() => handleAuthenticatedAction(() => navigate('/createPost'))} />
         <Link to="/explore">
         <AllInclusive/>
         </Link>
@@ -567,7 +657,20 @@ const Feed = () => {
                   <h2 style={{marginTop: '20px'}}>Search Posts</h2>
                   <div style={{display: 'flex',justifyContent: 'center', alignItems: 'center',gap: '10px'}}>
                     <FormControlLabel
-                      control={<Android12Switch defaultChecked />}
+                      control={<Android12Switch checked={!!currentLocation} onChange={(e) => {
+                        if (e.target.checked) {
+                          navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                              setCurrentLocation({
+                                currentLatitude: position.coords.latitude,
+                                currentLongitude: position.coords.longitude
+                              });
+                            }
+                          );
+                        } else {
+                          setCurrentLocation(null);
+                        }
+                      }} />}
                       label="Search Radius"
                     />
                     <Tune onClick={toggleSearchRadius} />
@@ -579,18 +682,18 @@ const Feed = () => {
                   <Slider
                     style={{color: darkMode ? 'white' : 'black'}}
                     aria-label="Custom marks"
-                    defaultValue={20}
+                    value={searchRadiusRange}
+                    onChange={(e,value) =>  setSearchRadiusRange(value as number)}
                     getAriaValueText={valuetext}
                     step={1}
                     valueLabelDisplay="auto"
                     marks={marks}
-                    
                   />
                 </div>
               </div>)}
                   </div>
                 </div>
-                <input onChange={handleLocationChange} style={{width: '100%',color: darkMode ? 'white' : 'black'}} type="text" placeholder="Search for users"/> 
+                <input onChange={(e) => handleLocationChange(e)} style={{width: '100%',color: darkMode ? 'white' : 'black'}} type="text" placeholder="Search for users"/> 
                 {locationSuggestions.length > 0 && (
                 <ul className="suggestions-list">
                   {locationSuggestions.map((suggestion, index) => (
@@ -602,7 +705,7 @@ const Feed = () => {
               )}
 
                 <div className="modal-buttons">
-                  <button type="submit">Search</button>
+                  <button type="submit" onClick={() => handleSearch()}>Search</button>
                   <button type="button" onClick={() => setIsSearchModalOpen(false)}>Cancel</button>
                 </div>
                 
@@ -610,82 +713,6 @@ const Feed = () => {
         </div>
       )}
 
-      {isModalOpen && user && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h2>Create New Post</h2>
-            <form onSubmit={handleCreatePost}>
-              <input
-                type="text"
-                placeholder="Title"
-                value={newPost.title}
-                onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
-                required
-              />
-              <textarea
-                placeholder="Description"
-                value={newPost.description}
-                onChange={(e) => setNewPost({ ...newPost, description: e.target.value })}
-                required
-              ></textarea>
-              <input
-                type="text"
-                placeholder="Location"
-                value={newPost.location}
-                onChange={handleLocationChange}
-                required
-              />
-              {locationSuggestions.length > 0 && (
-                <ul className="suggestions-list">
-                  {locationSuggestions.map((suggestion, index) => (
-                    <li key={index} onClick={() => handleSuggestionClick(suggestion)}>
-                      {suggestion.formatted}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <input
-                type="date"
-                placeholder="Date"
-                value={newPost.date}
-                onChange={(e) => setNewPost({ ...newPost, date: e.target.value })}
-                required
-              />
-              <input
-                type="number"
-                placeholder="People Needed"
-                value={newPost.peopleNeeded}
-                onChange={(e) => setNewPost({ ...newPost, peopleNeeded: parseInt(e.target.value) })}
-                required
-              />
-              <input type="file" accept="image/*" onChange={handleImageUpload} />
-              {selectedImage && (
-                <div className="crop-container">
-                  <Cropper
-                    image={URL.createObjectURL(selectedImage)}
-                    crop={crop}
-                    zoom={zoom}
-                    aspect={1}
-                    onCropChange={setCrop}
-                    onZoomChange={setZoom}
-                    onCropComplete={onCropComplete}
-                  />
-                  <button type="button" onClick={handleImageUploadToSupabase}>Upload Image</button>
-                </div>
-              )}
-              {croppedImageUrl && (
-                <div>
-                  <img src={croppedImageUrl} alt="Cropped" />
-                </div>
-              )}
-              <div className="modal-buttons">
-                <button type="submit">Create Post</button>
-                <button type="button" onClick={() => setIsModalOpen(false)}>Cancel</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {isAuthModalOpen && (
         <div className="modal-overlay">

@@ -25,7 +25,7 @@ import DirectMessagePage from "./pages/conversationSetep/DirectMessagePage";
 // import ChatPage from "./pages/conversationSetep/dummy page/Chat";
 import Register from "./pages/loginSetup/Register";
 import Explore from "./pages/explorePage/Explore";
-
+import CreatePost from "./pages/createPost/CreatePost";
 
 
 
@@ -55,6 +55,10 @@ export const router = createBrowserRouter([
       {
         path: '',
         element: <Feed />,
+      },
+      {
+        path: 'createPost',
+        element: <CreatePost />,
       },
       // {
       //   path: 'profile',

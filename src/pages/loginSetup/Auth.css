@@ -1,13 +1,46 @@
+:root {
+  /* Light Theme Colors */
+  --bg-primary: #f1ecec;
+  --text-primary: #1e1e1e;
+  --header-bg: #e6f3f0;
+  --card-bg: #ffffff;
+  --border-color: #e0e0e0;
+  --accent-color: #278f7a;
+  --secondary-text: #666;
+  --hover-bg: #f5f5f5;
+  --overlay-bg: rgba(255, 255, 255, 0.9);
+  --modal-bg: white;
+  --modal-text: #050505;
+  --modal-button-bg: #278f7a;
+  --modal-button-text: white;
+  --button-hover: #1a6b5a;
+}
+
 .auth-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #f0f2f5;
+  /* background-color: transparent; */
+  backdrop-filter: blur(10px);
+  position: relative;
 }
 
+.texture {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  object-fit: cover;
+}
+
+
+
 .auth-form {
-  background-color: white;
+  /* background-color: var(--overlay-bg); */
+  backdrop-filter: blur(10px);
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -15,10 +48,15 @@
   max-width: 400px;
 }
 
+.login-link {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
 .auth-form h2 {
   text-align: center;
   margin-bottom: 1.5rem;
-  color: #1877f2;
+  color: var(--accent-color);
 }
 
 .auth-form input {
@@ -33,7 +71,7 @@
 .auth-form button {
   width: 100%;
   padding: 0.8rem;
-  background-color: #1877f2;
+  background-color: var(--accent-color);
   color: white;
   border: none;
   border-radius: 6px;
@@ -43,7 +81,7 @@
 }
 
 .auth-form button:hover {
-  background-color: #166fe5;
+  background-color: var(--button-hover);
 }
 
 .topbar {
@@ -51,7 +89,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
-  background-color: #1a73e8;
+  background-color: var(--accent-color);
   color: white;
 }
 
@@ -72,7 +110,7 @@
 .user-info button {
   padding: 5px 10px;
   background-color: white;
-  color: #1a73e8;
+  color: var(--accent-color);
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -100,14 +138,14 @@
 .register-method-toggle button {
   flex: 1;
   padding: 0.5rem;
-  background-color: #f0f2f5;
+  background-color: var(--bg-primary);
   border: none;
   cursor: pointer;
 }
 
 .login-method-toggle button.active,
 .register-method-toggle button.active {
-  background-color: #1877f2;
+  background-color: var(--accent-color);
   color: white;
 }
 

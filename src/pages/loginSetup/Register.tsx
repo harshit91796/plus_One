@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { register, sendOtp, verifyOtp } from '../../Api';
 import { useAppDispatch } from '../../redux/hooks/hooks';
 import { setUser } from '../../redux/user/userSlice';
+import texture from '../../assets/images/texture8.jpg';
 import './Auth.css';
 
 const Register: React.FC = () => {
@@ -61,6 +62,7 @@ const Register: React.FC = () => {
 
   return (
     <div className="auth-container">
+      <img src={texture} alt="texture" className="texture" />
       <div className="auth-form">
         <h2>Register</h2>
         {error && <p className="error-message">{error}</p>}
@@ -93,6 +95,7 @@ const Register: React.FC = () => {
           <button onClick={() => handleOAuthRegister('google')} className="google-btn">Register with Google</button>
           <button onClick={() => handleOAuthRegister('facebook')} className="facebook-btn">Register with Facebook</button>
         </div>
+        <p>Already have an account? <Link className='login-link' to="/login">Login</Link></p>
       </div>
     </div>
   );

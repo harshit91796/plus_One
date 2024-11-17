@@ -4,7 +4,7 @@ import { login, sendOtp, verifyOtp } from '../../Api';
 import { useAppDispatch } from '../../redux/hooks/hooks';
 import { setUser } from '../../redux/user/userSlice';
 import './Auth.css';
-
+import texture from '../../assets/images/texture6.jpg';
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -71,6 +71,7 @@ const Login: React.FC = () => {
 
   return (
     <div className="auth-container">
+      <img src={texture} alt="texture" className="texture" />
       <div className="auth-form">
         <h2>Login</h2>
         {error && <p className="error-message">{error}</p>}
@@ -101,7 +102,7 @@ const Login: React.FC = () => {
           <button onClick={() => handleOAuthLogin('google')} className="google-btn">Login with Google</button>
           <button onClick={() => handleOAuthLogin('facebook')} className="facebook-btn">Login with Facebook</button>
         </div>
-        <p>Don't have an account? <Link to="/register">Register</Link></p>
+        <p>Don't have an account? <Link className='login-link' to="/register">Register</Link></p>
       </div>
     </div>
   );
