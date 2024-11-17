@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 // Base URL for your API
-// const API_BASE_URL = 'https://fluoridated-silicon-birch.glitch.me/api';
-const API_BASE_URL = 'http://localhost:3007/api';
+const API_BASE_URL = 'https://fluoridated-silicon-birch.glitch.me/api';
+// const API_BASE_URL = 'http://localhost:3007/api';
 
 // Create an axios instance with default config
 const api = axios.create({

@@ -36,9 +36,9 @@ export const uploadImagesToSupabase = async (images: ImageWithDescription[]): Pr
       try {
         fileToUpload = await imageCompression(image.file, options);
         console.log('Compressed size:', fileToUpload.size / 1024 / 1024, 'MB');
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Compression failed:', err);
-        throw new Error(`Failed to compress image: ${err.message}`);
+        throw new Error(`Failed to compress image: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
 
       const uniqueFilename = `image-${uuidv4()}-${Date.now()}.jpg`;
@@ -68,9 +68,9 @@ export const uploadImagesToSupabase = async (images: ImageWithDescription[]): Pr
     }
 
     return uploadedUrls;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in uploadImagesToSupabase:', error);
-    toast.error('Upload failed: ' + error.message);
+    toast.error('Upload failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
     throw error;
   }
 };
