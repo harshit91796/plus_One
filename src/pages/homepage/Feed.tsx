@@ -683,7 +683,7 @@ const loadMore = () => {
                     style={{color: darkMode ? 'white' : 'black'}}
                     aria-label="Custom marks"
                     value={searchRadiusRange}
-                    onChange={(e,value) =>  setSearchRadiusRange(value as number)}
+                    onChange={(_,value) =>  setSearchRadiusRange(value as number)}
                     getAriaValueText={valuetext}
                     step={1}
                     valueLabelDisplay="auto"
