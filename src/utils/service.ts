@@ -75,6 +75,9 @@ export const uploadImagesToSupabase = async (images: ImageWithDescription[]): Pr
   }
 };
 
+
+
+
 // Helper function to check file size before upload
 export const validateImageSize = (file: File): boolean => {
   const maxSize = 5 * 1024 * 1024; // 5MB

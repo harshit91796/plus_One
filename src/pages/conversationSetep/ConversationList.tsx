@@ -29,36 +29,36 @@ const ConversationList: React.FC<ConversationListProps> = ({ chats , selectedCha
   }
 
   return (
-    <>
+    <div className="chat-list">
       {chats.map((chat: any) => (
         <Link
+         style={{textDecoration: 'none'}}
           key={chat._id}
-          to={`/conversation/direct/message/${chat._id}`}
+          to={`/conversation/direct/message/${chat._id}/false`}
           className={`chat-item ${chat._id === selectedChatId ? 'selected' : ''}`}
         >
-          <img 
+          <img
             src={chat.isGroupChat 
               ? (chat.groupProfilePic || chat.users.find((u: any) => u._id === user._id)?.profilePic ) 
               : chat.users.find((u: any) => u._id !== user._id)?.profilePic 
-            } 
-            alt={chat.chatName} 
-            className="chat-avatar" 
+            }
+            alt={chat.name}
+            className="chat-item-avatar"
           />
-          <div className="chat-info">
-            <p className="chat-name">{chat.isGroupChat ? chat.chatName : chat.users.find((u: any)  => u._id !== user._id)?.name}</p>
-            <p className="chat-message">{chat.latestMessage ? chat.latestMessage.content : 'No messages yet'}</p>
-          </div>
-          <div className="chat-meta">
-            <p className="chat-time">
-              {chat.latestMessage && 'createdAt' in chat.latestMessage
-                ? new Date(chat.latestMessage.createdAt as string).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                : ''}
+          <div className="chat-item-content">
+            <div className="chat-item-header">
+            <p className="chat-name" style={{fontFamily: 'var(--font-heading)'}}>{chat.isGroupChat ? chat.chatName : chat.users.find((u: any)  => u._id !== user._id)?.name}</p>
+              <span className="chat-item-time">
+                {chat.latestMessage?.timestamp ? new Date(chat.latestMessage.timestamp).toLocaleTimeString() : ''}
+              </span>
+            </div>
+            <p className="chat-item-message">
+              {chat.latestMessage?.content || 'No messages yet'}
             </p>
-            {/* Add unread count if available */}
           </div>
         </Link>
       ))}
-    </>
+    </div>
   );
 };
 

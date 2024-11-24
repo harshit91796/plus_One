@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // Base URL for your API
-const API_BASE_URL = 'https://fluoridated-silicon-birch.glitch.me/api';
+// const API_BASE_URL = 'https://fluoridated-silicon-birch.glitch.me/api';
+const API_BASE_URL = 'https://special-hollow-soap.glitch.me/api';
 // const API_BASE_URL = 'http://localhost:3007/api';
 
 // Create an axios instance with default config
@@ -102,6 +103,27 @@ export const login = async (email: string, password: string) => {
     } else {
       console.error('An unknown error occurred');
     }
+    throw error;
+  }
+};
+
+export const getUser = async (userId: string) => {
+  try {
+    console.log("userId", userId);
+    const response = await api.get(`/getUserProfile/${userId}`);
+    console.log("response", response.data);
+    return response.data;
+  } catch (error: unknown) {
+    throw error;
+  }
+};
+
+export const getUserPosts = async (userId: string) => {
+  try {
+    const response = await api.get(`/getUserPosts/${userId}`);
+    console.log("response-getUserPosts", response.data);
+    return response.data;
+  } catch (error: unknown) {
     throw error;
   }
 };
@@ -243,6 +265,17 @@ export const accessChat = async (userId: string) => {
     } else {
       console.error('An unknown error occurred');
     }
+    throw error;
+  }
+};
+
+export const getChatDetails = async (chatId: string) => {
+  try {
+    const response = await api.get(`/convo/chat-details/${chatId}`);
+    console.log('Raw API Response:', response);
+    return response.data;
+  } catch (error: unknown) {
+    console.error('API Error:', error);
     throw error;
   }
 };

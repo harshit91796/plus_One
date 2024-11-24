@@ -3,11 +3,11 @@ import './feedMain.css'
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { RootState } from '../../redux/store';
-import {  searchPosts, sendMessageRequest } from '../../Api';
+import {  searchPosts } from '../../Api';
 import { fetchPlaceSuggestions } from '../../utils/opencage';
 import { v4 as uuidv4 } from 'uuid';
 
-import {  ModeNight,  LightMode, Diversity2, Close, Tune, AllInclusive, Male, SupervisedUserCircle, Female, Group, Bookmark, Event, TrendingUp, HelpOutline } from '@mui/icons-material';
+import {  ModeNight,  LightMode, Diversity2, Close, Tune, AllInclusive, Male, Female, Group, Bookmark, Event, TrendingUp, HelpOutline, Share, BookmarkBorder } from '@mui/icons-material';
 
 // import '../../assets/styles/react-easy-crop.css'; // Import the CSS file
 import {
@@ -27,12 +27,14 @@ import { socket } from "../../utils/socket";
 import { Link } from "react-router-dom";
 import { useAppDispatch } from '../../redux/hooks/hooks';
 import { clearUser } from '../../redux/user/userSlice';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useAppSelector } from '../../redux/hooks/hooks';
 import { toggleDarkMode } from '../../redux/theme/themeSlice';
 import { FormControlLabel, Slider, styled, Switch } from "@mui/material";
 import PostModal from '../../components/modal/postModal/PostModal';
+import { FaClock } from "react-icons/fa";
+import ErrorBoundary from '../../components/ErrorBoundary';
 
 
 
@@ -65,6 +67,14 @@ interface Post {
     tier: string;
     min: number;
     max: number;
+  };
+  joinedCounts: {
+    total: number;
+    male: number;
+    female: number;
+    remainingSpots: number;
+    remainingMale: number;
+    remainingFemale: number;
   };
 }
 
@@ -120,16 +130,17 @@ const Feed = () => {
   //   coordinates: [] as number[],
   //   image: [] 
   // });
-  const [messageRequests, setMessageRequests] = useState<{ [key: string]: string }>({});
+  // const [messageRequests, setMessageRequests] = useState<{ [key: string]: string }>({});
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [locationSuggestions, setLocationSuggestions] = useState<{ formatted: string, coordinates: { lat: number, lng: number } }[]>([]);
  
-  const [sentRequests, setSentRequests] = useState<{ [key: string]: boolean }>({});
+  // const [sentRequests, setSentRequests] = useState<{ [key: string]: boolean }>({});
   const [isSearchRadius, setIsSearchRadius] = useState(false);
   const darkMode = useAppSelector((state) => state.theme.darkMode);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [searchResults, setSearchResults] = useState<boolean>(false);
+  const [saved, setSaved] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchTitleQuery, setSearchTitleQuery] = useState<string>('');
   // const [searchRadius, setSearchRadius] = useState<Boolean>(false);
@@ -145,7 +156,7 @@ const postLimit = 4;
 
   useEffect(() => {
     loadPosts();
-    
+    setSearchResults(false);
     socket.on("connect", () => console.log("socket working"));
     console.log('user:', user, 'currentLocation:', currentLocation, 'searchRadiusRange:', searchRadiusRange);
   }, [currentLocation]);
@@ -235,33 +246,33 @@ const loadMore = () => {
   }
 };
 
-  const handleMessageRequestChange = (postId: string, message: string) => {
-    setMessageRequests({ ...messageRequests, [postId]: message });
-  };
+  // const handleMessageRequestChange = (postId: string, message: string) => {
+  //   setMessageRequests({ ...messageRequests, [postId]: message });
+  // };
 
-  const handleSendMessageRequest = async (postId: string, receiverId: string) => {
-    if (!user) {
-      setIsAuthModalOpen(true);
-      return;
-    }
-    console.log('postId:', postId);
-    console.log('receiverId:', receiverId);
-    console.log('messageRequests:', messageRequests);
+  // const handleSendMessageRequest = async (postId: string, receiverId: string) => {
+  //   if (!user) {
+  //     setIsAuthModalOpen(true);
+  //     return;
+  //   }
+  //   console.log('postId:', postId);
+  //   console.log('receiverId:', receiverId);
+  //   console.log('messageRequests:', messageRequests);
 
-    const message = messageRequests[postId];
-    if (!message) return;
+  //   const message = messageRequests[postId];
+  //   if (!message) return;
 
-    try {
-      await sendMessageRequest(receiverId, postId, message);
-      setMessageRequests({ ...messageRequests, [postId]: '' });
-      setSentRequests({ ...sentRequests, [postId]: true });
-      toast.success('Message request sent successfully!');
-    } catch (err) {
-      console.error('Error sending message request:', err);
-      setError('Failed to send message request. Please try again.');
-      toast.error('Failed to send message request.');
-    }
-  };
+  //   try {
+  //     await sendMessageRequest(receiverId, postId, message);
+  //     setMessageRequests({ ...messageRequests, [postId]: '' });
+  //     setSentRequests({ ...sentRequests, [postId]: true });
+  //     toast.success('Message request sent successfully!');
+  //   } catch (err) {
+  //     console.error('Error sending message request:', err);
+  //     setError('Failed to send message request. Please try again.');
+  //     toast.error('Failed to send message request.');
+  //   }
+  // };
 
   const toggleSearchModal = () => {
     setIsSearchModalOpen(!isSearchModalOpen);
@@ -564,14 +575,27 @@ const loadMore = () => {
                         <></>
                       )}
                         </div>
-                        <div className="gender-item">
-                          <SupervisedUserCircle className="gender-icon" />
-                          <span>{post.joined} Joined (M : 1, F : 2)</span>
+                        <div className="gender-item date-time">
+                          <FaClock className="calendar-icon" />
+                          <span>
+                            {new Date(post.createdAt).toLocaleDateString('en-US', { 
+                              weekday: 'short', 
+                              month: 'short', 
+                              day: 'numeric' 
+                            })}
+                            {' • '}
+                            {new Date(post.createdAt).toLocaleTimeString('en-US', { 
+                              hour: '2-digit', 
+                              minute: '2-digit',
+                              hour12: true 
+                            })}
+                          </span>
                         </div>
               </div>
             </div>
 
             <div className="post-container-bottom">
+              <Link to={`/profile/${post.user._id}`} style={{textDecoration: 'none', color: 'inherit'}}>
               <div className="user-info">
                 <img src={post.user.profilePic || 'default-avatar.png'} alt={post.user.name} />
                 <div>
@@ -579,8 +603,9 @@ const loadMore = () => {
                   <h5>{post.location.formatted}</h5>
                 </div>
               </div>
+              </Link>
               <p>{post.description}</p>
-              {user && !sentRequests[post._id] && !post.requests?.some((request: any) => request.user === user._id) && (
+              {/* {user && !sentRequests[post._id] && !post.requests?.some((request: any) => request.user === user._id) && (
                 <div 
                   className={`message-request-box ${darkMode ? 'dark-mode' : ''}`}
                   onClick={(e) => e.stopPropagation()}
@@ -601,7 +626,37 @@ const loadMore = () => {
                     Send Request
                   </button>
                 </div>
-              )}
+              )} */}
+                            <div className="post-actions">
+                <button 
+                  className="action-button" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Add share functionality
+                    navigator.share({
+                      title: post.title,
+                      text: post.description,
+                      url: window.location.href
+                    }).catch(err => console.log('Error sharing:', err));
+                  }}
+                >
+                  <Share className="action-icon" />
+                </button>
+                <button 
+                  className="action-button" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Add save functionality
+                    setSaved(prev => !prev);
+                  }}
+                >
+                  {saved ? (
+                    <Bookmark className="action-icon saved" />
+                  ) : (
+                    <BookmarkBorder className="action-icon" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         )) : <>
@@ -630,12 +685,13 @@ const loadMore = () => {
         Load More
       </button>
     )}
-    {searchResults && (
-      <div onClick={closeSearchResults} className="search-results">
+    
+      </div>
+      {searchResults && (
+      <div onClick={closeSearchResults} className="search-results-container">
         <Close className="close-search-results" onClick={closeSearchResults}/>
       </div>
     )}
-      </div>
       <footer>
         <HomeIcon />
         <AddCircleRoundedIcon onClick={() => handleAuthenticatedAction(() => navigate('/createPost'))} />
@@ -643,7 +699,7 @@ const loadMore = () => {
         <AllInclusive/>
         </Link>
         <SearchIcon onClick={toggleSearchModal}/>
-        <Link to="/profile">
+        <Link to={`/profile/${user?._id}`}>
           <AccountCircleRoundedIcon/>
         </Link>
       </footer>
@@ -728,10 +784,12 @@ const loadMore = () => {
       )}
 
       {selectedPost && (
-        <PostModal
-          post = {selectedPost}
-          onClose={() => setSelectedPost(null)}
-        />
+        <ErrorBoundary>
+          <PostModal
+            post={selectedPost as Post}
+            onClose={() => setSelectedPost(null)}
+          />
+        </ErrorBoundary>
       )}
 
       <ToastContainer />

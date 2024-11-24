@@ -98,6 +98,8 @@
   align-items: center;
   gap: 15px;
   margin-bottom: 20px;
+  /* height: 40px; */
+
 }
 
 .user-avatar {
@@ -115,7 +117,7 @@
 .user-details p {
   margin: 5px 0 0;
   color: var(--secondary-text);
-  font-size: 0.9em;
+  font-size: 0.8em;
 }
 
 .description {
@@ -182,6 +184,13 @@
   margin: 0;
 }
 
+.modal-title {
+  font-family: var(--font-primary);
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin: 0;
+  
+}
 
 
 /* Responsive Styles */
@@ -197,6 +206,9 @@
 
   .modal-details {
     padding: 0 10px;
+  }
+  .modal-title {
+    color: #278f7a;
   }
 }
 
@@ -270,7 +282,7 @@
     var(--accent-color) 85%,
     transparent 100%
   );
-  z-index: 1;
+  /* z-index: 1; */
 }
 
 .route-point {
@@ -415,3 +427,83 @@
     transform: translateX(0);
   }
 } */
+
+/* Request Section Styles */
+.request-section {
+  margin-top: 30px;
+  padding: 20px;
+  background: var(--card-bg);
+  border-radius: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.message-request-box {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.message-request-box input {
+  flex: 1;
+  padding: 12px 15px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-secondary);
+  font-size: var(--text-base);
+}
+
+.message-request-box input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(39, 143, 122, 0.1);
+}
+
+.send-request-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  transition: all 0.3s ease;
+}
+
+.send-request-button:hover {
+  background: var(--accent-color-dark);
+  transform: translateY(-2px);
+}
+
+.send-request-button:disabled {
+  background: var(--border-color);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.send-request-button svg {
+  font-size: 18px;
+}
+
+/* Dark mode styles */
+.dark-mode .message-request-box input {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .message-request-box {
+    flex-direction: column;
+  }
+
+  .send-request-button {
+    width: 100%;
+    justify-content: center;
+  }
+}

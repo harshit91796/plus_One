@@ -80,13 +80,18 @@ const ConversationPage: React.FC = () => {
       if (fetchedChats.length > 0) {
         setSelectedChatId(fetchedChats[0]._id);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('ConversationPage: Error loading chats:', error);
-      setError('Failed to load chats. Please try again.');
+      if (error.response?.status === 401) {
+        dispatch(clearUser());
+        navigate('/login');
+      } else {
+        setError('Failed to load chats. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [dispatch, navigate]);
 
   useEffect(() => {
     if (user) {
@@ -173,17 +178,21 @@ const ConversationPage: React.FC = () => {
     // setError(null);
     try {
       // const chat = await accessChat(userId);
-      const existingChat = chats.find(c => c.users?.some((user: { _id: string }) => user._id === userId));
+      let newChat = false;
+      const existingChat = chats.find(c => c.users?.some((user: { _id: string }) => user._id === userId  && c.isGroupChat === false ));
+
       if (existingChat) {
         setSelectedChatId( existingChat._id);
-        navigate(`/conversation/direct/message/${existingChat._id}`);
+        navigate(`/conversation/direct/message/${existingChat._id}/${newChat}`);
       } else {
         const chat = await sendMessageRequest(userId,'','');
-        console.log("chatRequest",chat);
-        setSelectedChatId(chat._id);
-        setIsModalOpen(false);
-        setSearchResults([]);
-        navigate(`/conversation/direct/message/${chat._id}`);
+          // console.log("chatRequest",chat);
+          newChat = true;
+          setSelectedChatId(chat._id);
+          setIsModalOpen(false);
+          setSearchResults([]);
+          navigate(`/conversation/direct/message/${userId}/${newChat}`);
+        
       }
      
      
@@ -199,17 +208,13 @@ const ConversationPage: React.FC = () => {
     return <div>Loading conversations...</div>;
   }
 
-  if (error) {
-    dispatch(clearUser());
-    navigate('/login');
-  }
-
   return (
     <div className={`chat-container ${darkMode ? 'dark-mode' : ''}`}>
+      {error && <div className="error-message">{error}</div>}
       {/* Header Section */}
       
 
-      <div className="chat-header">
+      <div className="chat-header" >
       <ArrowBackIos onClick={() => navigate('/')} />
         <h1>Chats</h1>
         <i className="fas fa-search"></i>
@@ -270,6 +275,7 @@ const ConversationPage: React.FC = () => {
           value={searchQuery}
           onChange={handleSearch}
           placeholder="Search for users..."
+          className={`search-input ${darkMode ? 'dark-mode' : ''}`}
         />
         <ul className="search-results">
           {searchResults.map((result: any) => (

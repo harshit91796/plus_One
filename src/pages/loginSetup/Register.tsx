@@ -15,6 +15,7 @@ const Register: React.FC = () => {
     email: '',
     password: '',
     age: '',
+    gender: '',
     phoneNumber: '',
     otp: '',
   });
@@ -76,6 +77,7 @@ const Register: React.FC = () => {
             <input type="email" name="email" placeholder="Email" onChange={handleChange} required />
             <input type="password" name="password" placeholder="Password" onChange={handleChange} required />
             <input type="number" name="age" placeholder="Age" onChange={handleChange} required />
+            <input type="text" name="gender" placeholder="Gender" onChange={handleChange} required />
             <button type="submit">Register</button>
           </form>
         ) : (

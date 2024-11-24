@@ -64,7 +64,7 @@ const Login: React.FC = () => {
   };
 
   const handleOAuthLogin = (provider: string) => {
-    window.location.href = `http://localhost:3007/api/auth/${provider}`;
+    window.location.href = `https://special-hollow-soap.glitch.me/api/auth/${provider}`;
 
     
   };

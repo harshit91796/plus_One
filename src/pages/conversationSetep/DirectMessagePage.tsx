@@ -5,7 +5,7 @@ import ChatWindow from './ChatWindow';
 import { getMessageRequest, getMessages, handleMessageRequest, sendMessage } from '../../Api';
 import { initSocket, joinChatRoom, leaveRoom, onMessageReceived, socketSendMessage } from '../../socket';
 import './DirectMessage.css';
-import { ArrowBackIos } from '@mui/icons-material';
+import { ArrowBackIos, Call, VideoCall } from '@mui/icons-material';
 
 interface Message {
   _id: string;
@@ -17,6 +17,7 @@ interface Message {
     name: string;
   };
   createdAt: string;
+  isGroupChat: boolean;
 }
 
 
@@ -42,7 +43,8 @@ const messageReducer = (state: Message[], action: MessageAction): Message[] => {
 };
 
 const DirectMessagePage: React.FC = () => {
-  const { chatId } = useParams<{ chatId: string }>();
+  const { chatId ,newChat } = useParams<{ chatId: string ,newChat:string}>();
+  const { darkMode } = useSelector((state: any) => state.theme);
   const navigate = useNavigate();
   const currentUser = useSelector((state: any) => state.user.user);
   const [messages, dispatch] = useReducer(messageReducer, []);
@@ -52,6 +54,18 @@ const DirectMessagePage: React.FC = () => {
   const lastSentMessageRef = useRef<string | null>(null);
   const [messageRequest, setMessageRequest] = useState<any>(null);
 
+  // console.log("currentChat", currentChat.isGroupChat);
+
+  // console.log("newChat", newChat);
+
+  useEffect(() => {
+    if (newChat === "true") {
+      setTimeout(() => {
+        loadMessages();
+      }, 1000);
+    }
+  }, [newChat]);
+
   const loadMessages = useCallback(async () => {
     if (!chatId) return;
     setIsLoading(true);
@@ -59,6 +73,7 @@ const DirectMessagePage: React.FC = () => {
       const fetchedData = await getMessages(chatId);
       if (fetchedData.chat.messageRequests) {
         const requestResponse = await getMessageRequest(fetchedData.chat.messageRequests);
+        console.log("requestResponseMessageRequestPage", requestResponse);
         setMessageRequest(requestResponse.messageRequest);
       }
       if (Array.isArray(fetchedData.messages) && fetchedData.messages.length > 0) {
@@ -109,6 +124,7 @@ const DirectMessagePage: React.FC = () => {
       mediaUrl: fileUrl,
       sender: currentUser,
       createdAt: new Date().toISOString(),
+      isGroupChat: currentChat.isGroupChat
     };
     lastSentMessageRef.current = tempId;
     dispatch({ type: 'ADD_MESSAGE', payload: tempMessage });
@@ -125,6 +141,7 @@ const DirectMessagePage: React.FC = () => {
 
   const memoizedChatWindow = useMemo(() => (
     <ChatWindow
+      darkMode={darkMode}
       chatId={chatId!}
       messages={messages}
       onSendMessage={(chatId: string, content: string, fileUrl?: string, fileType?: string) => 
@@ -132,6 +149,7 @@ const DirectMessagePage: React.FC = () => {
       }
       currentChat={currentChat}
       currentUser={currentUser}
+      // isGroupChat={currentChat.isGroupChat}
     />
   ), [chatId, messages, handleSendMessage, currentChat, currentUser]);
 
@@ -145,17 +163,25 @@ const DirectMessagePage: React.FC = () => {
 
   const handleAccept = async () => {
     const response = await handleMessageRequest(currentChat.messageRequests, "accept");
-    if (response.success) {
+    if (response.status === "accepted") {
       loadMessages();
     }
   };
 
+  const handleUserProfileClick = () => {
+
+    if (currentChat) {
+      const otherUser = currentChat.users.find((u: any) => u._id !== currentUser._id);
+      navigate(`/user/${otherUser._id}/chat/${chatId}/media`);
+    }
+  };
+
   return (
-    <div className="chat-container">
+    <div className={`chat-container ${darkMode ? 'dark-mode' : ''}`}>
       {/* Header Section */}
       <div className="chat-header">
-      <ArrowBackIos onClick={() => navigate('/conversations')} />
-        <div className="profile-info">
+        <ArrowBackIos onClick={() => navigate('/conversations')} />
+        <div className="profile-info-chatPage-container" onClick={handleUserProfileClick} style={{ cursor: 'pointer' }}>
           {currentChat && currentChat.users && (
             <img
               src={currentChat.isGroupChat 
@@ -177,15 +203,22 @@ const DirectMessagePage: React.FC = () => {
           </div>
         </div>
         <div className="header-icons">
-          <button className="icon-button">📞</button>
-          <button className="icon-button">🎥</button>
+          <button className="icon-button"><Call /></button>
+          <button className="icon-button"><VideoCall /></button>
         </div>
       </div>
 
-      {currentChat?.isTemporary && messageRequest?.status === "pending" && messageRequest?.sender._id !== currentUser._id && (
-        <div className='temporary-chat-icons'>
-          <button className="icon-button" onClick={handleAccept}>Accept</button>
-          <button className='icon-button'>Decline</button>
+      {/* Message Request Banner - Moved and Redesigned */}
+      {currentChat?.isTemporary && messageRequest?.status === "pending" && messageRequest?.sender !== currentUser._id && messageRequest?.receiver === currentUser._id && (
+        <div className="message-request-banner">
+          <div className="message-request-content">
+            <span>Message Request</span>
+            <p>Would you like to accept messages from this user?</p>
+            <div className="message-request-actions">
+              <button className="accept-button" onClick={handleAccept}>Accept</button>
+              <button className="decline-button">Decline</button>
+            </div>
+          </div>
         </div>
       )}
 

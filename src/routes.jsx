@@ -16,7 +16,7 @@ import UploadAvatar from "./pages/initialSetup/UploadAvatar";
 // import TrevelPrefrence from "./pages/profileSetup/TrevelPrefrence";
 // import SportsPrefrence from "./pages/profileSetup/SportsPrefrence";
 import Feed from "./pages/homepage/Feed";
-// import Profile from "./pages/user/profile";
+import Profile from "./pages/user/Profile";
 import Login from "./pages/loginSetup/Login";
 import OathCallback from "./pages/loginSetup/OAuthCallback";
 import ConversationPage from "./pages/conversationSetep/ConversationPage";
@@ -26,6 +26,7 @@ import DirectMessagePage from "./pages/conversationSetep/DirectMessagePage";
 import Register from "./pages/loginSetup/Register";
 import Explore from "./pages/explorePage/Explore";
 import CreatePost from "./pages/createPost/CreatePost";
+import UserChatMedia from "./pages/userMedia/userChatMedia";
 
 
 
@@ -60,14 +61,18 @@ export const router = createBrowserRouter([
         path: 'createPost',
         element: <CreatePost />,
       },
-      // {
-      //   path: 'profile',
-      //   element: (
-      //     <ProtectedRoute requireAuth={true}>
-      //       <Profile />
-      //     </ProtectedRoute>
-      //   ),
-      // },
+      {
+        path: 'user/:userId/chat/:chatId/media',
+        element: <UserChatMedia />,
+      },
+      {
+        path: 'profile/:userId',
+        element: (
+          <ProtectedRoute requireAuth={true}>
+            <Profile />
+          </ProtectedRoute>
+        ),
+      },
       {
         path: 'conversations',
         element: (
@@ -77,12 +82,13 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'conversation/direct/message/:chatId',
+        path: 'conversation/direct/message/:chatId/:newChat',
         element: (
           <ProtectedRoute requireAuth={true}>
             <DirectMessagePage />
           </ProtectedRoute>
         ),
+
       },
       {
         path: 'explore',

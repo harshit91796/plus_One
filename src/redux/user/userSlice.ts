@@ -4,7 +4,7 @@ interface User {
   _id: string;
   name: string;
   email: string;
-  profilePic?: string;  // Add this line
+  profilePic?: string | null;  // Add this line
   // Add other user properties as needed
 }
 

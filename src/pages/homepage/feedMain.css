@@ -48,24 +48,30 @@
   cursor: pointer;
 }
 
-.search-results {
+.search-results-container {
   position: absolute;
-  top: 80%;
-    left: 43%;
-    width: 54px;
-    height: 54px;
-    background-color: var(--card-bg);
-    border-radius: 20px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
+  top: 77%;
+  left: 43%;
+  right: 0;
+  height: 61px;
+  width: 15%;
+  overflow-y: auto;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  background: rgba(56, 56, 56, 0.233);
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  /* z-index: 1000; */
+
 }
 
-.search-results .close-search-results {
+.search-results-container .close-search-results {
   font-size: 2.5rem;
   color: var(--text-primary);
   cursor: pointer;
   margin-left: 7px;
-    margin-top: 7px;
+  margin-top: 7px;
 }
 
 .no-posts {
@@ -952,4 +958,69 @@
     0 6px 6px rgba(0,0,0,0.1),
     0 0 100px rgba(78,205,196,0.1);
   transform: translateY(-5px);
+}
+
+.date-time {
+  font-family: var(--font-secondary);
+  font-size: var(--text-2xl);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.date-time .calendar-icon {
+  font-size: 16px;
+  color: var(--accent-color);
+}
+
+.date-time span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Post Actions */
+.post-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 8px 15px;
+  border-top: 1px solid var(--border-color);
+  margin-top: 10px;
+}
+
+.action-button {
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-button:hover {
+  background-color: var(--hover-bg);
+  transform: scale(1.1);
+}
+
+.action-icon {
+  font-size: 20px;
+}
+
+.action-icon.saved {
+  color: var(--accent-color);
+}
+
+/* Dark mode styles */
+.dark-mode .action-button {
+  color: var(--text-primary);
+}
+
+.dark-mode .action-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
